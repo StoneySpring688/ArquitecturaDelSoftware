@@ -1,0 +1,34 @@
+package SegundUM.Productos.servicio.categorias;
+
+import java.util.List;
+
+import SegundUM.Productos.dominio.Categoria;
+import SegundUM.Productos.servicio.ServicioException;
+
+public interface ServicioCategorias {
+
+    /**
+     * Carga una jerarquía de categorías desde un fichero XML.
+     * - ruta puede ser:
+     *    - un path en classpath (ej: "categoriasXML/Arte_y_ocio.xml")
+     *    - o un path absoluto/relativo del sistema de ficheros
+     *
+     * No debe cargar una categoría principal si ya existe en el sistema.
+     */
+    void cargarJerarquia(String ruta) throws ServicioException;
+
+    /**
+     * Modifica la descripción de una categoría.
+     */
+    void modificarDescripcion(String categoriaId, String nuevaDescripcion) throws ServicioException;
+
+    /**
+     * Devuelve las categorías raíz (categoriaPadre == null).
+     */
+    List<Categoria> getCategoriasRaiz() throws ServicioException;
+
+    /**
+     * Devuelve todos los descendientes (directos e indirectos) de la categoría indicada.
+     */
+    List<Categoria> getDescendientes(String categoriaId) throws ServicioException;
+}
