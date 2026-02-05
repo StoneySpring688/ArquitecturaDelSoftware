@@ -70,4 +70,23 @@ public class RepositorioCategoriasJPA extends RepositorioJPA<Categoria> implemen
             EntityManagerHelper.closeEntityManager();
         }
     }
+    
+    @Override
+    public List<Categoria> buscarPorNombre(String nombre) throws RepositorioException {
+        EntityManager em = EntityManagerHelper.getEntityManager();
+        try {
+            // Usamos LOWER y LIKE para que la búsqueda sea flexible (insensible a mayúsculas)
+            TypedQuery<Categoria> query = em.createQuery(
+                "SELECT c FROM Categoria c WHERE LOWER(c.nombre) LIKE LOWER(:nombre)", 
+                Categoria.class
+            );
+            query.setParameter("nombre", "%" + nombre + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new RepositorioException("Error al buscar categoría por nombre: " + nombre, e);
+        } finally {
+            EntityManagerHelper.closeEntityManager();
+        }
+    }
+    
 }

@@ -9,7 +9,7 @@ import javax.persistence.Persistence;
  */
 public class EntityManagerHelper {
     
-    private static final String PERSISTENCE_UNIT_NAME = "SegundUM";
+    private static final String PERSISTENCE_UNIT_NAME = "segundumProductos";
     private static EntityManagerFactory emf;
     private static final ThreadLocal<EntityManager> threadLocal = new ThreadLocal<>();
     

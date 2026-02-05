@@ -33,7 +33,7 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
         EntityManager em = EntityManagerHelper.getEntityManager();
         try {
             TypedQuery<Producto> query = em.createQuery(
-                "SELECT p FROM Producto p WHERE p.vendedor.id = :vendedorId", 
+            	"SELECT p FROM Producto p WHERE p.vendedorId = :vendedorId", 
                 Producto.class
             );
             query.setParameter("vendedorId", vendedorId);
@@ -114,8 +114,9 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
         }
     }
     
+    @Deprecated
     @Override
-    public List<ResumenProducto> getHistorialMes(int mes, int anio, String emailVendedor) throws RepositorioException {
+    public List<ResumenProducto> getHistorialMes(int mes, int anio, String vendedorId) throws RepositorioException {
         EntityManager em = EntityManagerHelper.getEntityManager();
         try {
             // inicio y fin del mes
@@ -126,10 +127,10 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
             StringBuilder jpql = new StringBuilder(
                 "SELECT p FROM Producto p WHERE p.fechaPublicacion >= :inicio AND p.fechaPublicacion < :fin"
             );
-            
+            // TODO hay que lamar a la api de Microservicio de usuarios ara obtener el id del vendedor a partir del email.
             // Si email de vendedor, añadir filtro
-            if (emailVendedor != null && !emailVendedor.trim().isEmpty()) {
-                jpql.append(" AND p.vendedor.email = :email");
+            if (vendedorId != null && !vendedorId.trim().isEmpty()) {
+                jpql.append(" AND p.vendedorId = :vendedorId");
             }
             
             jpql.append(" ORDER BY p.visualizaciones DESC");
@@ -139,8 +140,8 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
             query.setParameter("fin", fin);
             
             // parámetro de email si está presente
-            if (emailVendedor != null && !emailVendedor.trim().isEmpty()) {
-                query.setParameter("email", emailVendedor);
+            if (vendedorId != null && !vendedorId.trim().isEmpty()) {
+                query.setParameter("vendedorId", vendedorId);
             }
             
             List<Producto> productos = query.getResultList();
@@ -159,7 +160,7 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
         } catch (Exception e) {
             throw new RepositorioException(
                 "Error al obtener historial del mes " + mes + "/" + anio + 
-                (emailVendedor != null ? " para el vendedor " + emailVendedor : ""), 
+                (vendedorId != null ? " para el vendedor " + vendedorId : ""), 
                 e
             );
         } finally {
@@ -231,7 +232,7 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
 	    try {
 	        // Usamos JOIN FETCH c para traer la categoría y evitar LazyException en la vista
 	        TypedQuery<Producto> query = em.createQuery(
-	            "SELECT p FROM Producto p JOIN FETCH p.categoria c WHERE p.vendedor.id = :vendedorId", 
+	            "SELECT p FROM Producto p JOIN FETCH p.categoria c WHERE p.vendedorId = :vendedorId", 
 	            Producto.class
 	        );
 	        query.setParameter("vendedorId", vendedorId);

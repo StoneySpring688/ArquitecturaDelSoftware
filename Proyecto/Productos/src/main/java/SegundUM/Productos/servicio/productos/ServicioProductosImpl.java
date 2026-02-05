@@ -12,13 +12,11 @@ import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.LugarRecogida;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
-import SegundUM.Productos.dominio.Usuario;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.repositorio.FactoriaRepositorios;
 import SegundUM.Productos.repositorio.RepositorioException;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategorias;
 import SegundUM.Productos.repositorio.productos.RepositorioProductos;
-import SegundUM.Productos.repositorio.usuarios.RepositorioUsuarios;
 import SegundUM.Productos.servicio.ServicioException;
 
 /**
@@ -30,12 +28,10 @@ public class ServicioProductosImpl implements ServicioProductos {
 	
     private final RepositorioProductos repositorioProductos;
     private final RepositorioCategorias repositorioCategorias;
-    private final RepositorioUsuarios repositorioUsuarios;
 
     public ServicioProductosImpl() {
         this.repositorioProductos = FactoriaRepositorios.getRepositorio(Producto.class);
         this.repositorioCategorias = FactoriaRepositorios.getRepositorio(Categoria.class);
-        this.repositorioUsuarios = FactoriaRepositorios.getRepositorio(Usuario.class);
     }
 
     @Override
@@ -52,19 +48,9 @@ public class ServicioProductosImpl implements ServicioProductos {
                 throw new ServicioException("La categoría con ID " + categoriaId + " no existe en el sistema", e);
             }
 
-            // VERIFICACIÓN: Obtener vendedor y verificar que existe
-            Usuario vendedor;
-            try {
-            	logger.info("Obteniendo vendedor con ID: " + vendedorId);
-                vendedor = repositorioUsuarios.getById(vendedorId);
-            } catch (EntidadNoEncontrada e) {
-            	logger.error("Vendedor con ID " + vendedorId + " no encontrado", e);
-                throw new ServicioException("El vendedor con ID " + vendedorId + " no existe en el sistema", e);
-            }
-
             String id = UUID.randomUUID().toString();
 
-            Producto p = new Producto(id, titulo, descripcion, precio, estado, categoria, envioDisponible, vendedor);
+            Producto p = new Producto(id, titulo, descripcion, precio, estado, categoria, envioDisponible, vendedorId);
 
             return repositorioProductos.add(p);
         } catch (RepositorioException e) {
@@ -125,8 +111,14 @@ public class ServicioProductosImpl implements ServicioProductos {
 
     @Override
     public List<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor) throws ServicioException {
-        try {
-            return repositorioProductos.getHistorialMes(mes, anio, emailVendedor);
+    	String vendedorId = null;
+    	if (emailVendedor != null) {
+            // TODO: vendedorId = clienteHttpUsuarios.obtenerIdPorEmail(emailVendedor);
+            
+            vendedorId = "ID-TEMPORAL-PARA-PRUEBAS"; // TODO tempooral para pruebas sin la api
+       }
+    	try {
+            return repositorioProductos.getHistorialMes(mes, anio, vendedorId);
         } catch (RepositorioException e) {
             throw new ServicioException("Error al obtener historial del mes", e);
         }
@@ -169,7 +161,7 @@ public class ServicioProductosImpl implements ServicioProductos {
             Producto p = repositorioProductos.getById(idProducto);
 
             // 2. VERIFICACIÓN DE SEGURIDAD: ¿Es el dueño?
-            if (!p.getVendedor().getId().equals(idUsuarioSolicitante)) {
+            if (!p.getVendedorId().equals(idUsuarioSolicitante)) {
                 // logger.warn("Intento de modificación no autorizada por usuario: " + idUsuarioSolicitante);
                 throw new ServicioException("No tienes permiso para editar este producto.");
             }

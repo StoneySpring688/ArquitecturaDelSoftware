@@ -35,7 +35,7 @@ public interface RepositorioProductos extends RepositorioString<Producto> {
     /**
      * Obtiene el historial del mes de un vendedor, ordenado por visualizaciones.
      */
-    List<ResumenProducto> getHistorialMes(int mes, int anio, String emailVendedor) throws RepositorioException;
+    List<ResumenProducto> getHistorialMes(int mes, int anio, String vendedorId) throws RepositorioException;
     
     /**
      * Obtiene el historial del mes ordenado por visualizaciones.

@@ -4,6 +4,13 @@ import javax.persistence.*;
 
 import SegundUM.Productos.repositorio.Identificable;
 
+/**
+ * Esto es una versión simplificada de los usuarios,
+ * los datos necesarios se actualizarán con información proveniente del microservicio de usuarios.
+ * Sirve para usar la bd como una cahé de los usuarios respecto a los productos, para evitar hacer llamadas excesivas a la api
+ * del microservicio de usuarios.
+ **/
+
 @Entity
 @Table(name = "usuarios_replica")
 public class Usuario implements Identificable{
@@ -44,7 +51,7 @@ public class Usuario implements Identificable{
     public String getApellidos() { return apellidos; }
     public void setApellidos(String apellidos) { this.apellidos = apellidos; }
     
-    // Método helper para obtener nombre completo (útil para vistas si fuese necesario)
+    // Método para obtener nombre completo (útil para vistas si fuese necesario)
     public String getNombreCompleto() {
         return this.nombre + " " + this.apellidos;
     }

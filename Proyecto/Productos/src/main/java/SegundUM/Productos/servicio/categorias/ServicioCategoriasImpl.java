@@ -90,4 +90,20 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
             throw new ServicioException("Error al recuperar descendientes de " + categoriaId, e);
         }
     }
+    
+    @Override
+    public Categoria buscarCategoriaPorNombre(String nombre) throws ServicioException {
+        try {
+            List<Categoria> resultados = repositorioCategorias.buscarPorNombre(nombre);
+            if (resultados.isEmpty()) {
+                return null;
+            }
+            // Devolvemos la primera coincidencia
+            return resultados.get(0);
+        } catch (RepositorioException e) {
+            logger.error("Error buscando categoría por nombre: " + nombre, e);
+            throw new ServicioException("Error buscando categoría", e);
+        }
+    }
+    
 }

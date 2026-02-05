@@ -27,4 +27,6 @@ public interface RepositorioCategorias extends RepositorioString<Categoria> {
      * Verifica si existe una categoría con el ID dado.
      */
     boolean existe(String id) throws RepositorioException;
+    
+    List<Categoria> buscarPorNombre(String nombre) throws RepositorioException;
 }

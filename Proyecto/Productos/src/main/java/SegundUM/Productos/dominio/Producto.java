@@ -48,16 +48,15 @@ public class Producto implements Identificable {
     })
     private LugarRecogida recogida;
     
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "vendedor_id", nullable = false)
-    private Usuario vendedor;
+    @Column(name = "vendedor_id", nullable = false)
+    private String vendedorId;
     
     // Constructor por defecto para JPA
     protected Producto() {}
     
     public Producto(String id, String titulo, String descripcion, BigDecimal precio,
                     EstadoProducto estado, Categoria categoria, boolean envioDisponible,
-                    Usuario vendedor) {
+                    String vendedorId) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -65,7 +64,7 @@ public class Producto implements Identificable {
         this.estado = estado;
         this.categoria = categoria;
         this.envioDisponible = envioDisponible;
-        this.vendedor = vendedor;
+        this.vendedorId = vendedorId;
         this.fechaPublicacion = LocalDateTime.now();
         this.visualizaciones = 0;
     }
@@ -158,11 +157,11 @@ public class Producto implements Identificable {
         this.recogida = recogida;
     }
     
-    public Usuario getVendedor() {
-        return vendedor;
+    public String getVendedorId() {
+        return vendedorId;
     }
     
-    public void setVendedor(Usuario vendedor) {
-        this.vendedor = vendedor;
+    public void setVendedorId(String vendedorId) {
+        this.vendedorId = vendedorId;
     }
 }

@@ -31,4 +31,10 @@ public interface ServicioCategorias {
      * Devuelve todos los descendientes (directos e indirectos) de la categoría indicada.
      */
     List<Categoria> getDescendientes(String categoriaId) throws ServicioException;
+    
+    /**
+     * Busca una categoría por su nombre (o parte de él).
+     * Devuelve la primera coincidencia o null si no existe.
+     */
+    Categoria buscarCategoriaPorNombre(String nombre) throws ServicioException;
 }
