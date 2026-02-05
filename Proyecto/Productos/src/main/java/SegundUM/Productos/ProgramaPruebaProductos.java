@@ -6,21 +6,21 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import SegundUM.Productos.controller.Controller;
+import SegundUM.Productos.controller.ControllerProductos;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 
-public class ProgramaPrueba {
+public class ProgramaPruebaProductos {
 
     // Inicializamos el Logger
-    private static final Logger logger = LoggerFactory.getLogger(ProgramaPrueba.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProgramaPruebaProductos.class);
 
     public static void main(String[] args) {
         logger.info("=== INICIO DE PRUEBAS DEL MICROSERVICIO DE PRODUCTOS ===");
 
         // 1. Instanciamos el Controlador
-        Controller controller = new Controller();
+        ControllerProductos controller = new ControllerProductos();
 
         // ----------------------------------------------------------------
         // PASO 1: Carga Masiva de Categorías

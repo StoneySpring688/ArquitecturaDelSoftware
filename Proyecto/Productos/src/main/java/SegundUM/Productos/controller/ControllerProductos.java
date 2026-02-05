@@ -25,16 +25,16 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
  * Se han eliminado las dependencias del servicio de usuarios.
  * </p>
  */
-public class Controller {
+public class ControllerProductos {
 
-    private static final Logger logger = LoggerFactory.getLogger(Controller.class);
+    private static final Logger logger = LoggerFactory.getLogger(ControllerProductos.class);
     private static final String CARPETA_CATEGORIAS = "categoriasXML";
     
     // Solo servicios del dominio de Productos
     private ServicioProductos servicioProductos;
     private ServicioCategorias servicioCategorias;
 
-    public Controller() {
+    public ControllerProductos() {
         // Factoría cargando las implementaciones del microservicio actual
         this.servicioProductos = FactoriaServicios.getServicio(ServicioProductos.class); //
         this.servicioCategorias = FactoriaServicios.getServicio(ServicioCategorias.class);
