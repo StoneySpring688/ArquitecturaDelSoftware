@@ -8,7 +8,7 @@ La aplicación se ha dividido siguiendo principios de diseño orientado al domin
 
 * **Microservicio de Usuarios:** Gestiona el ciclo de vida completo de los usuarios, incluyendo credenciales, roles y datos personales extensos.
 * **Microservicio de Productos:** Encargado de la gestión de artículos, categorías y búsquedas.
-* **Autonomía de Datos:** Para evitar acoplamientos fuertes en tiempo de ejecución, el microservicio de Productos mantiene una **versión simplificada de la entidad Usuario** (réplica local) con datos básicos: ID, email, nombre y apellidos.
+* **Autonomía de Datos:** Cada microservicio tiene una base de datos con la información específica de su servicio (usuarios o   productos + categorias).
 * **Jerarquía de Categorías:** Implementa la carga y gestión de categorías complejas mediante una estructura jerárquica.
 
 
@@ -23,17 +23,10 @@ La aplicación se ha dividido siguiendo principios de diseño orientado al domin
 | **Arquitectura** | Microservicios |
 | **Logging** | SLF4J para trazabilidad de errores |
 
-## 📦 Estructura del Proyecto (MS Productos)
-
-**TODO**
-
----
-
 ## 🚀 Instalación y Uso
 
 **TODO**
 
----
 
 ## 👥 Equipo de Trabajo
 

@@ -114,7 +114,6 @@ public class RepositorioProductosJPA extends RepositorioJPA<Producto> implements
         }
     }
     
-    @Deprecated
     @Override
     public List<ResumenProducto> getHistorialMes(int mes, int anio, String vendedorId) throws RepositorioException {
         EntityManager em = EntityManagerHelper.getEntityManager();
