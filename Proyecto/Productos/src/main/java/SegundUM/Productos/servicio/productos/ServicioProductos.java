@@ -6,6 +6,7 @@ import java.util.List;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
+import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.servicio.ServicioException;
 
 
@@ -61,4 +62,15 @@ public interface ServicioProductos {
      * Recupera los productos publicados por un vendedor específico.
      */
     List<Producto> getProductosPorVendedor(String vendedorId) throws ServicioException;
+
+    /* 
+        Método para obtener un producto por su id
+    */
+    Producto getProductoPorId(String productoId) throws ServicioException, EntidadNoEncontrada;
+
+    /*
+        Método para eliminar un producto por su id
+     */
+    void eliminarProducto(String productoId) throws ServicioException, EntidadNoEncontrada;
+    
 }

@@ -87,4 +87,23 @@ public class ServicioUsuariosImpl implements ServicioUsuarios {
 		}
 	}
 
+	@Override
+	public Usuario getUserById(String usuarioId) throws ServicioException, EntidadNoEncontrada {
+		try {
+			return repositorioUsuarios.getById(usuarioId);
+		} catch (RepositorioException e) {
+			throw new ServicioException("Error al obtener el usuario con ID: " + usuarioId, e);
+		}
+	}
+
+	@Override
+	public void deleteUserById(String usuarioId) throws ServicioException, EntidadNoEncontrada {
+		try {
+			Usuario u = repositorioUsuarios.getById(usuarioId);
+			repositorioUsuarios.delete(u);
+		} catch (RepositorioException e) {
+			throw new ServicioException("Error al eliminar el usuario con ID: " + usuarioId, e);
+		}
+	}
+
 }

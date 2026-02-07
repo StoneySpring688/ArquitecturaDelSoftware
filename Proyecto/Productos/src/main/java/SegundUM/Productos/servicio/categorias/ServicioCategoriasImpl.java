@@ -106,4 +106,23 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
         }
     }
     
+    @Override
+    public Categoria getCategoriaById(String id) throws ServicioException, EntidadNoEncontrada {
+        try {
+            return repositorioCategorias.getById(id); 
+        } catch (EntidadNoEncontrada e) {
+                throw new EntidadNoEncontrada("La categoría con ID " + id + " no existe.", e);
+        } catch (RepositorioException e){
+                throw new ServicioException("Error al obtener la categoría con ID " + id, e);
+        }   
+    }
+
+    @Override
+    public List<Categoria> getCategorias() throws ServicioException {
+        try {
+            return repositorioCategorias.getAll();
+        } catch (RepositorioException e) {
+            throw new ServicioException("Error al recuperar categorías", e);
+        }
+    }
 }

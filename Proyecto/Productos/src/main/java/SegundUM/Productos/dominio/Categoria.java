@@ -4,6 +4,8 @@ import javax.persistence.*;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import SegundUM.Productos.repositorio.Identificable;
 
 import java.util.ArrayList;
@@ -33,15 +35,18 @@ public class Categoria implements Identificable {
 
 	@OneToMany(mappedBy = "categoriaPadre", cascade = CascadeType.ALL, orphanRemoval = true)
 	@XmlElement(name = "categoria")
+	@JsonIgnore
 	private List<Categoria> subcategorias = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "categoria_padre_id")
 	@XmlTransient
+	@JsonIgnore
 	private Categoria categoriaPadre;
 
 	@OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
 	@XmlTransient
+	@JsonIgnore
 	private List<Producto> productos = new ArrayList<>();
 
 	// Constructor por defecto para JPA y JAXB

@@ -185,5 +185,30 @@ public class ServicioProductosImpl implements ServicioProductos {
             throw new ServicioException("Error al modificar el producto.", e);
         }
     }
+
+    @Override
+    public Producto getProductoPorId(String productoId) throws ServicioException, EntidadNoEncontrada {
+        try {
+            return repositorioProductos.getById(productoId);
+        } catch (EntidadNoEncontrada e) {
+            throw new EntidadNoEncontrada("El producto con ID " + productoId + " no existe.", e);
+        } catch (RepositorioException e) {
+            throw new ServicioException("Error al recuperar el producto con ID " + productoId, e);
+        }
+    }   
+
+    @Override
+    public void eliminarProducto(String productoId) throws ServicioException, EntidadNoEncontrada {
+        try {
+            Producto p = repositorioProductos.getById(productoId);
+            if(p != null) {
+                repositorioProductos.delete(p);
+            } else {
+                throw new EntidadNoEncontrada("El producto con ID " + productoId + " no existe.");
+            }
+        } catch (RepositorioException e) {
+            throw new ServicioException("Error al eliminar el producto con ID " + productoId, e);
+        }
+    }
 	
 }

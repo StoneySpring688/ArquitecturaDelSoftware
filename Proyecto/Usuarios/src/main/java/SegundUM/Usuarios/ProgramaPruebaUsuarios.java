@@ -78,14 +78,18 @@ public class ProgramaPruebaUsuarios {
         
         if (modificado) {
             logger.info("✅ Datos modificados.");
-            
+
             // Verificamos recuperando el usuario de nuevo (simulando refresco)
             Usuario uActualizado = controller.login(email, newpass);
-            logger.info("   -> Nuevo nombre en BD: {}", uActualizado.getNombre());
-            logger.info("   -> Nuevo teléfono en BD: {}", uActualizado.getTelefono());
-            
-            if (uActualizado.getNombre().equals("Laura María")) {
-                logger.info("✅ Verificación de persistencia correcta.");
+            if (uActualizado != null) {
+                logger.info("   -> Nuevo nombre en BD: {}", uActualizado.getNombre());
+                logger.info("   -> Nuevo teléfono en BD: {}", uActualizado.getTelefono());
+
+                if (uActualizado.getNombre().equals("Laura") && "686123456".equals(uActualizado.getTelefono())) {
+                    logger.info("✅ Verificación de persistencia correcta.");
+                }
+            } else {
+                logger.error("❌ No se pudo verificar: login con nueva clave falló.");
             }
         } else {
             logger.error("❌ Falló la modificación.");

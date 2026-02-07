@@ -3,6 +3,7 @@ package SegundUM.Usuarios.servicio.usuarios;
 import java.time.LocalDate;
 
 import SegundUM.Usuarios.dominio.Usuario;
+import SegundUM.Usuarios.repositorio.EntidadNoEncontrada;
 import SegundUM.Usuarios.servicio.ServicioException;
 
 /**
@@ -30,4 +31,14 @@ public interface ServicioUsuarios {
      * @throws ServicioException Si el usuario no existe o la clave es incorrecta.
      */
     Usuario login(String email, String clave) throws ServicioException;
+
+    /**
+     * Obtiene un usuario por su identificador.
+     */
+    Usuario getUserById(String usuarioId) throws ServicioException, EntidadNoEncontrada;
+
+    /**
+     * Elimina un usuario por su identificador.
+     */
+    void deleteUserById(String usuarioId) throws ServicioException, EntidadNoEncontrada;
 }

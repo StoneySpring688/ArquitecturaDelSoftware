@@ -3,6 +3,7 @@ package SegundUM.Productos.servicio.categorias;
 import java.util.List;
 
 import SegundUM.Productos.dominio.Categoria;
+import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.servicio.ServicioException;
 
 public interface ServicioCategorias {
@@ -37,4 +38,9 @@ public interface ServicioCategorias {
      * Devuelve la primera coincidencia o null si no existe.
      */
     Categoria buscarCategoriaPorNombre(String nombre) throws ServicioException;
+
+    Categoria getCategoriaById(String id) throws ServicioException, EntidadNoEncontrada;
+
+    List<Categoria> getCategorias() throws ServicioException ;
+
 }
