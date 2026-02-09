@@ -42,15 +42,9 @@ public class ProductoRestController {
     /** GET /productos/{id} — Obtener un producto por ID */
     @GET
     @Path("/{id}")
-    public Response getProducto(@PathParam("id") String id) {
-        try {
-            Producto producto = servicioProductos.getProductoPorId(id);
-            return Response.ok(producto).build();
-        } catch (EntidadNoEncontrada e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public Response getProducto(@PathParam("id") String id) throws ServicioException, EntidadNoEncontrada {
+        Producto producto = servicioProductos.getProductoPorId(id);
+        return Response.ok(producto).build();
     }
 
     /** POST /productos — Dar de alta un producto */
@@ -62,15 +56,11 @@ public class ProductoRestController {
             @QueryParam("estado") EstadoProducto estado,
             @QueryParam("categoriaId") String categoriaId,
             @QueryParam("envioDisponible") boolean envioDisponible,
-            @QueryParam("vendedorId") String vendedorId) {
-        try {
-            String id = servicioProductos.altaProducto(titulo, descripcion, precio, estado,
-                    categoriaId, envioDisponible, vendedorId);
-            URI nuevaURI = uriInfo.getAbsolutePathBuilder().path(id).build();
-            return Response.created(nuevaURI).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("vendedorId") String vendedorId) throws ServicioException {
+        String id = servicioProductos.altaProducto(titulo, descripcion, precio, estado,
+                categoriaId, envioDisponible, vendedorId);
+        URI nuevaURI = uriInfo.getAbsolutePathBuilder().path(id).build();
+        return Response.created(nuevaURI).build();
     }
 
     /** PUT /productos/{id} — Modificar precio y/o descripción (con verificación de propietario) */
@@ -80,13 +70,9 @@ public class ProductoRestController {
             @PathParam("id") String productoId,
             @QueryParam("descripcion") String nuevaDescripcion,
             @QueryParam("precio") BigDecimal nuevoPrecio,
-            @QueryParam("usuarioId") String usuarioId) {
-        try {
-            servicioProductos.modificarProducto(productoId, nuevaDescripcion, nuevoPrecio, usuarioId);
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("usuarioId") String usuarioId) throws ServicioException {
+        servicioProductos.modificarProducto(productoId, nuevaDescripcion, nuevoPrecio, usuarioId);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /** PUT /productos/{id}/recogida — Asociar lugar de recogida a un producto */
@@ -96,25 +82,17 @@ public class ProductoRestController {
             @PathParam("id") String productoId,
             @QueryParam("descripcion") String descripcion,
             @QueryParam("longitud") Double longitud,
-            @QueryParam("latitud") Double latitud) {
-        try {
-            servicioProductos.asignarLugarRecogida(productoId, descripcion, longitud, latitud);
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("latitud") Double latitud) throws ServicioException {
+        servicioProductos.asignarLugarRecogida(productoId, descripcion, longitud, latitud);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /** PUT /productos/{id}/visualizaciones — Registrar una nueva visualización */
     @PUT
     @Path("/{id}/visualizaciones")
-    public Response registrarVisualizacion(@PathParam("id") String productoId) {
-        try {
-            servicioProductos.anadirVisualizacion(productoId);
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public Response registrarVisualizacion(@PathParam("id") String productoId) throws ServicioException {
+        servicioProductos.anadirVisualizacion(productoId);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /** GET /productos/buscar — Buscar productos con filtros opcionales */
@@ -124,26 +102,18 @@ public class ProductoRestController {
             @QueryParam("categoriaId") String categoriaId,
             @QueryParam("texto") String texto,
             @QueryParam("estadoMinimo") EstadoProducto estadoMinimo,
-            @QueryParam("precioMaximo") BigDecimal precioMaximo) {
-        try {
-            List<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
-                    estadoMinimo, precioMaximo);
-            return Response.ok(productos).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("precioMaximo") BigDecimal precioMaximo) throws ServicioException {
+        List<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
+                estadoMinimo, precioMaximo);
+        return Response.ok(productos).build();
     }
 
     /** GET /productos/vendedor/{vendedorId} — Obtener productos de un vendedor */
     @GET
     @Path("/vendedor/{vendedorId}")
-    public Response getProductosPorVendedor(@PathParam("vendedorId") String vendedorId) {
-        try {
-            List<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId);
-            return Response.ok(productos).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public Response getProductosPorVendedor(@PathParam("vendedorId") String vendedorId) throws ServicioException {
+        List<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId);
+        return Response.ok(productos).build();
     }
 
     /** GET /productos/historial?mes=X&anio=Y — Resumen mensual de productos */
@@ -151,13 +121,9 @@ public class ProductoRestController {
     @Path("/historial")
     public Response historialMes(
             @QueryParam("mes") int mes,
-            @QueryParam("anio") int anio) {
-        try {
-            List<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio);
-            return Response.ok(resumen).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("anio") int anio) throws ServicioException {
+        List<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio);
+        return Response.ok(resumen).build();
     }
 
     /** GET /productos/historial/{email}?mes=X&anio=Y — Resumen mensual de un vendedor */
@@ -166,26 +132,16 @@ public class ProductoRestController {
     public Response historialMesVendedor(
             @PathParam("email") String emailVendedor,
             @QueryParam("mes") int mes,
-            @QueryParam("anio") int anio) {
-        try {
-            List<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor);
-            return Response.ok(resumen).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+            @QueryParam("anio") int anio) throws ServicioException {
+        List<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor);
+        return Response.ok(resumen).build();
     }
 
     /** DELETE /productos/{id} — Eliminar un producto */
     @DELETE
     @Path("/{id}")
-    public Response eliminarProducto(@PathParam("id") String productoId) {
-        try {
-            servicioProductos.eliminarProducto(productoId);
-            return Response.status(Response.Status.NO_CONTENT).build();
-        } catch (EntidadNoEncontrada e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ServicioException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public Response eliminarProducto(@PathParam("id") String productoId) throws ServicioException, EntidadNoEncontrada {
+        servicioProductos.eliminarProducto(productoId);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 }

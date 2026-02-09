@@ -1,6 +1,7 @@
 package SegundUM.Usuarios.servicio.usuarios;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import SegundUM.Usuarios.dominio.Usuario;
 import SegundUM.Usuarios.repositorio.EntidadNoEncontrada;
@@ -10,6 +11,8 @@ import SegundUM.Usuarios.servicio.ServicioException;
  * Operaciones de negocio sobre usuarios.
  */
 public interface ServicioUsuarios {
+
+    List<Usuario> getAllUsuarios() throws ServicioException;
 
     /**
      * Da de alta un usuario y devuelve su identificador.

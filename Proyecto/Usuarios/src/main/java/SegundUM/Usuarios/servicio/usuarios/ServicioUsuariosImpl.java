@@ -1,6 +1,7 @@
 package SegundUM.Usuarios.servicio.usuarios;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -22,6 +23,16 @@ public class ServicioUsuariosImpl implements ServicioUsuarios {
 		this.repositorioUsuarios = FactoriaRepositorios.getRepositorio(Usuario.class);
 	}
 
+	@Override
+	public List<Usuario> getAllUsuarios() throws ServicioException {
+		try {
+			return repositorioUsuarios.getAll();
+		} catch (RepositorioException e) {
+			logger.error("Error al obtener la lista de usuarios", e);
+			throw new ServicioException("Error al obtener la lista de usuarios", e);
+		}
+	}
+	
 	@Override
 	public String altaUsuario(String email, String nombre, String apellidos, String clave,
 			LocalDate fechaNacimiento, String telefono) throws ServicioException {
