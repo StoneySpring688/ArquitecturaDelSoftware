@@ -1,4 +1,4 @@
-package SegundUM.Productos.rest.excepciones.rest.excepciones;
+package SegundUM.Productos.rest.excepciones;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
