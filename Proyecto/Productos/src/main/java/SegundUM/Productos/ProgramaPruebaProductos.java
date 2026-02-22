@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import SegundUM.Productos.controller.ControllerProductos;
 import SegundUM.Productos.dominio.EstadoProducto;
@@ -17,10 +19,15 @@ public class ProgramaPruebaProductos {
     private static final Logger logger = LoggerFactory.getLogger(ProgramaPruebaProductos.class);
 
     public static void main(String[] args) {
+    	
+    	// iniciar contexto del main de SpringBoot
+    	ConfigurableApplicationContext contexto =
+    			SpringApplication.run(ProductosApp.class, args);
+    	
         logger.info("=== INICIO DE PRUEBAS DEL MICROSERVICIO DE PRODUCTOS ===");
 
         // 1. Instanciamos el Controlador
-        ControllerProductos controller = new ControllerProductos();
+        ControllerProductos controller = contexto.getBean(ControllerProductos.class);
 
         // ----------------------------------------------------------------
         // PASO 1: Carga Masiva de Categorías
@@ -142,5 +149,8 @@ public class ProgramaPruebaProductos {
         }
         
         logger.info("=== FIN DE PRUEBAS ===");
+        
+        // Cerrar el contexto de Spring Boot al finalizar las pruebas
+        contexto.close();
     }
 }

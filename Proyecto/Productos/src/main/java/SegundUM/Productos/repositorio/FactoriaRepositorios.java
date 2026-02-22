@@ -6,6 +6,8 @@ import SegundUM.Productos.utils.PropertiesReader;
  * Factoría que encapsula la implementación de los repositorios.
  * Utiliza un fichero de propiedades para cargar la implementación.
  */
+
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public class FactoriaRepositorios {
 	
 	private static final String PROPERTIES = "repositorios.properties";

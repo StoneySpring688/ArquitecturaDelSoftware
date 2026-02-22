@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public class PropertiesReader {
     private Properties properties;
 

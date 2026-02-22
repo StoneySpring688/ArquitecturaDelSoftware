@@ -13,7 +13,7 @@ import SegundUM.Productos.utils.PropertiesReader;
  * Los servicios se gestionan como un singleton (instancia única).
  *
  */
-
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public class FactoriaServicios {
 	
 	private static final String PROPERTIES = "servicios.properties";

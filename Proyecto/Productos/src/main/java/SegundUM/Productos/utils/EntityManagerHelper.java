@@ -7,6 +7,7 @@ import javax.persistence.Persistence;
 /**
  * Helper para gestionar EntityManager de JPA.
  */
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public class EntityManagerHelper {
     
     private static final String PERSISTENCE_UNIT_NAME = "segundumProductos";

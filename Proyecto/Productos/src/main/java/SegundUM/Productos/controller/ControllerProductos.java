@@ -8,12 +8,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
-import SegundUM.Productos.servicio.FactoriaServicios;
 import SegundUM.Productos.servicio.ServicioException;
 import SegundUM.Productos.servicio.categorias.ServicioCategorias;
 import SegundUM.Productos.servicio.productos.ServicioProductos;
@@ -25,6 +26,7 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
  * Se han eliminado las dependencias del servicio de usuarios.
  * </p>
  */
+@Component
 public class ControllerProductos {
 
     private static final Logger logger = LoggerFactory.getLogger(ControllerProductos.class);
@@ -34,10 +36,11 @@ public class ControllerProductos {
     private ServicioProductos servicioProductos;
     private ServicioCategorias servicioCategorias;
 
-    public ControllerProductos() {
+    @Autowired
+    public ControllerProductos(ServicioProductos servicioProductos, ServicioCategorias servicioCategorias) {
         // Factoría cargando las implementaciones del microservicio actual
-        this.servicioProductos = FactoriaServicios.getServicio(ServicioProductos.class); //
-        this.servicioCategorias = FactoriaServicios.getServicio(ServicioCategorias.class);
+        this.servicioProductos = servicioProductos;
+        this.servicioCategorias = servicioCategorias;
     }
 
     

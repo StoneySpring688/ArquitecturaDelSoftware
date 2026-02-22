@@ -6,11 +6,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import org.eclipse.persistence.config.HintValues;
-import org.eclipse.persistence.config.QueryHints;
-
 import SegundUM.Productos.utils.EntityManagerHelper;
 
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public abstract class RepositorioJPA<T extends Identificable> implements RepositorioString<T> {
     
     public abstract Class<T> getClase();
@@ -109,7 +107,7 @@ public abstract class RepositorioJPA<T extends Identificable> implements Reposit
 
             TypedQuery<T> query = em.createQuery(queryString, getClase());
 
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            // query.setHint(QueryHints.REFRESH, HintValues.TRUE);
 
             return query.getResultList();
 
@@ -132,7 +130,7 @@ public abstract class RepositorioJPA<T extends Identificable> implements Reposit
 
             Query query = em.createQuery(queryString);
 
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            // query.setHint(QueryHints.REFRESH, HintValues.TRUE);
 
             return query.getResultList();
 
