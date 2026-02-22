@@ -68,6 +68,7 @@ public class ServicioProductosImpl implements ServicioProductos {
     }
 
     @Override
+    @Deprecated(since = "No lo se, borrarlo no deberia rromper nada, pero ya lo borrare", forRemoval = true)
     public void modificarProducto(String productoId, BigDecimal nuevoPrecio, String nuevaDescripcion) throws ServicioException {
     	
     	Producto p = repositorioProductos.findById(productoId)

@@ -1,16 +1,15 @@
 package SegundUM.Productos.rest.controllers;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
-import SegundUM.Productos.servicio.FactoriaServicios;
 import SegundUM.Productos.servicio.ServicioException;
 import SegundUM.Productos.servicio.categorias.ServicioCategorias;
 
@@ -21,29 +20,27 @@ import SegundUM.Productos.servicio.categorias.ServicioCategorias;
  *
  * Base path: /api/categorias
  */
-@Path("/categorias")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping("/api/categorias")
 public class CategoriaRestController {
 
-    private ServicioCategorias servicioCategorias;
+    private final ServicioCategorias servicioCategorias;
 
-    public CategoriaRestController() {
-        this.servicioCategorias = FactoriaServicios.getServicio(ServicioCategorias.class);
+    @Autowired
+    public CategoriaRestController(ServicioCategorias servicioCategorias) {
+        this.servicioCategorias = servicioCategorias;
     }
 
     /** GET /categorias/{id} — Obtener una categoría por ID */
-    @GET
-    @Path("/{id}")
-    public Response getCategoria(@PathParam("id") String id) throws ServicioException, EntidadNoEncontrada {
-        Categoria categoria = servicioCategorias.getCategoriaById(id);
-        return Response.ok(categoria).build();
+    @GetMapping("/{id}")
+    public Categoria getCategoria(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
+        return servicioCategorias.getCategoriaById(id);
+        
     }
 
     /** GET /categorias/ — Listar todas las categorías */
-    @GET
-    @Path("/")
-    public Response getCategorias() throws ServicioException {
-        return Response.ok(servicioCategorias.getCategorias()).build();
+    @GetMapping
+    public List<Categoria> getCategorias() throws ServicioException {
+        return servicioCategorias.getCategorias();
     }
 }
