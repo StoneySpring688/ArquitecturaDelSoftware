@@ -6,6 +6,9 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.dominio.EstadoProducto;
@@ -13,7 +16,6 @@ import SegundUM.Productos.dominio.LugarRecogida;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
-import SegundUM.Productos.repositorio.FactoriaRepositorios;
 import SegundUM.Productos.repositorio.RepositorioException;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategorias;
 import SegundUM.Productos.repositorio.productos.RepositorioProductos;
@@ -22,6 +24,9 @@ import SegundUM.Productos.servicio.ServicioException;
 /**
  * Implementación del servicio de productos.
  */
+
+@Service
+@Transactional
 public class ServicioProductosImpl implements ServicioProductos {
 
 	private final Logger logger = LoggerFactory.getLogger(ServicioProductosImpl.class);
@@ -29,90 +34,64 @@ public class ServicioProductosImpl implements ServicioProductos {
     private final RepositorioProductos repositorioProductos;
     private final RepositorioCategorias repositorioCategorias;
 
-    public ServicioProductosImpl() {
-        this.repositorioProductos = FactoriaRepositorios.getRepositorio(Producto.class);
-        this.repositorioCategorias = FactoriaRepositorios.getRepositorio(Categoria.class);
+    @Autowired
+    public ServicioProductosImpl(RepositorioCategorias repositorioCategorias, RepositorioProductos repositorioProductos) {
+        this.repositorioProductos = repositorioProductos;
+        this.repositorioCategorias = repositorioCategorias;
     }
 
     @Override
     public String altaProducto(String titulo, String descripcion, BigDecimal precio, EstadoProducto estado,
-                               String categoriaId, boolean envioDisponible, String vendedorId) throws ServicioException {
-        try {
-            // VERIFICACIÓN: Obtener categoría y verificar que existe
-            Categoria categoria;
-            try {
-            	logger.info("Obteniendo categoría con ID: " + categoriaId);
-                categoria = repositorioCategorias.getById(categoriaId);
-            } catch (EntidadNoEncontrada e) {
-            	logger.error("Categoría con ID " + categoriaId + " no encontrada", e);
-                throw new ServicioException("La categoría con ID " + categoriaId + " no existe en el sistema", e);
-            }
+    		String categoriaId, boolean envioDisponible, String vendedorId) throws ServicioException {
+    	
+    	// VERIFICACIÓN: Obtener categoría y verificar que existe
+    	Categoria categoria;
+    	categoria = repositorioCategorias.findById(categoriaId)
+    			.orElseThrow(() -> new ServicioException("Categoría con ID " + categoriaId + " no encontrada"));
 
-            String id = UUID.randomUUID().toString();
+    	String id = UUID.randomUUID().toString();
 
-            Producto p = new Producto(id, titulo, descripcion, precio, estado, categoria, envioDisponible, vendedorId);
+    	Producto p = new Producto(id, titulo, descripcion, precio, estado, categoria, envioDisponible, vendedorId);
 
-            return repositorioProductos.add(p);
-        } catch (RepositorioException e) {
-        	logger.error("Error al dar de alta el producto", e);
-            throw new ServicioException("Error al dar de alta el producto", e);
-        }
+    	repositorioProductos.save(p);
+    	return id;
     }
 
     @Override
     public void asignarLugarRecogida(String productoId, String descripcion, Double longitud, Double latitud) throws ServicioException {
-        try {
-            Producto p = repositorioProductos.getById(productoId);
-            LugarRecogida lugar = new LugarRecogida(descripcion, longitud, latitud);
-            p.setRecogida(lugar);
-            repositorioProductos.update(p);
-        } catch (EntidadNoEncontrada e) {
-            // VERIFICACIÓN: El producto no existe
-        	logger.error("Producto con ID " + productoId + " no encontrado", e);
-            throw new ServicioException("El producto con ID " + productoId + " no existe en el sistema", e);
-        } catch (RepositorioException e) {
-        	logger.error("Error al asignar lugar de recogida al producto " + productoId, e);
-            throw new ServicioException("Error al asignar lugar de recogida al producto " + productoId, e);
-        }
+    	
+    	Producto p = repositorioProductos.findById(productoId)
+    			.orElseThrow(() -> new ServicioException("El producto con ID " + productoId + " no existe en el sistema"));
+    	LugarRecogida lugar = new LugarRecogida(descripcion, longitud, latitud);
+    	p.setRecogida(lugar);
+    	repositorioProductos.save(p);
     }
 
     @Override
     public void modificarProducto(String productoId, BigDecimal nuevoPrecio, String nuevaDescripcion) throws ServicioException {
-        try {
-            Producto p = repositorioProductos.getById(productoId);
-            if (nuevoPrecio != null) p.setPrecio(nuevoPrecio);
-            if (nuevaDescripcion != null) p.setDescripcion(nuevaDescripcion);
-            repositorioProductos.update(p);
-        } catch (EntidadNoEncontrada e) {
-            // VERIFICACIÓN: el producto no existe
-        	logger.error("Producto con ID " + productoId + " no encontrado", e);
-            throw new ServicioException("El producto con ID " + productoId + " no existe en el sistema", e);
-        } catch (RepositorioException e) {
-        	logger.error("Error al modificar el producto " + productoId, e);
-            throw new ServicioException("Error al modificar producto " + productoId, e);
-        }
+    	
+    	Producto p = repositorioProductos.findById(productoId)
+    			.orElseThrow(() -> new ServicioException("El producto con ID " + productoId + " no existe en el sistema"));
+    	if (nuevoPrecio != null) p.setPrecio(nuevoPrecio);
+    	if (nuevaDescripcion != null) p.setDescripcion(nuevaDescripcion);
+    	repositorioProductos.save(p);
     }
 
     @Override
     public void anadirVisualizacion(String productoId) throws ServicioException {
-        try {
-            Producto p = repositorioProductos.getById(productoId);
-            p.incrementarVisualizaciones();
-            repositorioProductos.update(p);
-        } catch (EntidadNoEncontrada e) {
-            // VERIFICACIÓN: el producto no existe
-        	logger.error("Producto con ID " + productoId + " no encontrado", e);
-            throw new ServicioException("El producto con ID " + productoId + " no existe en el sistema", e);
-        } catch (RepositorioException e) {
-        	logger.error("Error al añadir visualización al producto " + productoId, e);
-            throw new ServicioException("Error al añadir visualización al producto " + productoId, e);
-        }
+    	
+    	Producto p = repositorioProductos.findById(productoId)
+    			.orElseThrow(() -> new ServicioException("El producto con ID " + productoId + " no existe en el sistema"));
+    	p.incrementarVisualizaciones();
+    	repositorioProductos.save(p);
     }
 
     @Override
     public List<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor) throws ServicioException {
+    	
     	String vendedorId = null;
     	if (emailVendedor != null) {
+    		logger.info("USANDO VALOR DE PRUEBAS PARA ID DEL VENDEDOR, SE DEBE REEMPLAZAR POR LA CONSULTA A LA API DE USUARIOS");
             // TODO: vendedorId = clienteHttpUsuarios.obtenerIdPorEmail(emailVendedor);
             
             vendedorId = "ID-TEMPORAL-PARA-PRUEBAS"; // TODO tempooral para pruebas sin la api
@@ -126,6 +105,7 @@ public class ServicioProductosImpl implements ServicioProductos {
 
     @Override
     public List<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo) throws ServicioException {
+    	
         try {
         	logger.info("Buscando productos con filtros - Categoría ID: " + categoriaId + ", Texto: " + texto + ", Estado mínimo: " + estadoMinimo + ", Precio máximo: " + precioMaximo);
             return repositorioProductos.buscarProductos(categoriaId, texto, estadoMinimo, precioMaximo);
@@ -137,6 +117,7 @@ public class ServicioProductosImpl implements ServicioProductos {
 
 	@Override
 	public List<ResumenProducto> historialMes(int mes, int anio) throws ServicioException {
+		
 		try {
             return repositorioProductos.getHistorialMes(mes, anio);
         } catch (RepositorioException e) {
@@ -146,8 +127,9 @@ public class ServicioProductosImpl implements ServicioProductos {
 	
 	@Override
     public List<Producto> getProductosPorVendedor(String vendedorId) throws ServicioException {
+		
         try {
-            return repositorioProductos.getByVendedor(vendedorId);
+            return repositorioProductos.getByVendedorConCategoria(vendedorId);
         } catch (RepositorioException e) {
             // logger.error("Error al recuperar productos del vendedor: " + vendedorId, e);
             throw new ServicioException("Error al obtener los productos del vendedor", e);
@@ -156,59 +138,43 @@ public class ServicioProductosImpl implements ServicioProductos {
 	
 	@Override
     public void modificarProducto(String idProducto, String nuevaDescripcion, BigDecimal nuevoPrecio, String idUsuarioSolicitante) throws ServicioException {
-        try {
-            // 1. Recuperamos el producto
-            Producto p = repositorioProductos.getById(idProducto);
+		
+		// 1. Recuperamos el producto
+		Producto p = repositorioProductos.findById(idProducto)
+				.orElseThrow(() -> new ServicioException("El producto con ID " + idProducto + " no existe en el sistema"));
 
-            // 2. VERIFICACIÓN DE SEGURIDAD: ¿Es el dueño?
-            if (!p.getVendedorId().equals(idUsuarioSolicitante)) {
-                // logger.warn("Intento de modificación no autorizada por usuario: " + idUsuarioSolicitante);
-                throw new ServicioException("No tienes permiso para editar este producto.");
-            }
+		// 2. VERIFICACIÓN DE SEGURIDAD - verificar que el usuario solicitante es el vendedor del producto
+		if (!p.getVendedorId().equals(idUsuarioSolicitante)) {
+			logger.warn("Intento de modificación no autorizada por usuario: " + idUsuarioSolicitante);
+			throw new ServicioException("No tienes permiso para editar este producto.");
+		}
 
-            // 3. Actualizamos solo los campos permitidos
-            if (nuevaDescripcion != null && !nuevaDescripcion.isEmpty()) {
-                p.setDescripcion(nuevaDescripcion);
-            }
-            
-            if (nuevoPrecio != null) {
-                // Podrías añadir validación de precio > 0 aquí
-                p.setPrecio(nuevoPrecio);
-            }
+		// 3. Actualizar solo los campos permitidos
+		if (nuevaDescripcion != null && !nuevaDescripcion.isEmpty()) {
+			p.setDescripcion(nuevaDescripcion);
+		}
 
-            // 4. Persistimos los cambios
-            repositorioProductos.update(p); // Asumimos que RepositorioJPA tiene update
+		if (nuevoPrecio != null) {
+			p.setPrecio(nuevoPrecio);
+		}
 
-        } catch (EntidadNoEncontrada e) {
-            throw new ServicioException("El producto no existe.", e);
-        } catch (RepositorioException e) {
-            throw new ServicioException("Error al modificar el producto.", e);
-        }
+		// 4. Persistir los cambios
+		repositorioProductos.save(p);
     }
 
     @Override
     public Producto getProductoPorId(String productoId) throws ServicioException, EntidadNoEncontrada {
-        try {
-            return repositorioProductos.getById(productoId);
-        } catch (EntidadNoEncontrada e) {
-            throw new EntidadNoEncontrada("El producto con ID " + productoId + " no existe.", e);
-        } catch (RepositorioException e) {
-            throw new ServicioException("Error al recuperar el producto con ID " + productoId, e);
-        }
+    	
+    	return repositorioProductos.findById(productoId)
+                .orElseThrow(() -> new EntidadNoEncontrada("El producto con ID " + productoId + " no existe."));
     }   
 
     @Override
     public void eliminarProducto(String productoId) throws ServicioException, EntidadNoEncontrada {
-        try {
-            Producto p = repositorioProductos.getById(productoId);
-            if(p != null) {
-                repositorioProductos.delete(p);
-            } else {
-                throw new EntidadNoEncontrada("El producto con ID " + productoId + " no existe.");
-            }
-        } catch (RepositorioException e) {
-            throw new ServicioException("Error al eliminar el producto con ID " + productoId, e);
-        }
+    	
+    	Producto p = repositorioProductos.findById(productoId)
+    			.orElseThrow(() -> new EntidadNoEncontrada("El producto con ID " + productoId + " no existe."));
+		repositorioProductos.delete(p);
     }
 	
 }

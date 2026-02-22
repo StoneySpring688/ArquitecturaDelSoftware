@@ -7,6 +7,7 @@ import java.util.List;
  * El parámetro T representa el tipo de datos de la entidad.
  * El parámetro K es el tipo del identificador.
  */
+@Deprecated(since = "SpringData migration", forRemoval = true)
 public interface Repositorio<T, K> {
     
     K add(T entity) throws RepositorioException;

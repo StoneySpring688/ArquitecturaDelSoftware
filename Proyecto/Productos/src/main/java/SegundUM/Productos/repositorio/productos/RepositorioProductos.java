@@ -4,22 +4,26 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.RepositorioException;
-import SegundUM.Productos.repositorio.RepositorioString;
 
 
 /**
  * Repositorio específico para Productos con operaciones AdHoc.
  */
-public interface RepositorioProductos extends RepositorioString<Producto> {
+
+@NoRepositoryBean
+public interface RepositorioProductos extends CrudRepository<Producto, String> {
     
     /**
      * Obtiene los productos de un vendedor.
      */
-    List<Producto> getProductosPorVendedor(String vendedorId) throws RepositorioException;
+    List<Producto> findByVendedorId(String vendedorId) throws RepositorioException;
     
     /**
      * Busca productos por categoría, descripción, estado y precio máximo.
@@ -47,5 +51,5 @@ public interface RepositorioProductos extends RepositorioString<Producto> {
      */
     List<Producto> getProductosPorFechas(LocalDateTime inicio, LocalDateTime fin) throws RepositorioException;
     
-    List<Producto> getByVendedor(String vendedorId) throws RepositorioException;
+    List<Producto> getByVendedorConCategoria(String vendedorId) throws RepositorioException; 
 }
