@@ -11,7 +11,12 @@ La aplicación se ha dividido siguiendo principios de diseño orientado al domin
 * **Autonomía de Datos:** Cada microservicio tiene una base de datos con la información específica de su servicio (usuarios o   productos + categorias).
 * **Jerarquía de Categorías:** Implementa la carga y gestión de categorías complejas mediante una estructura jerárquica.
 
-
+## Api Testing
+Una vez ejecutado el microservicio de Productos, se ofrece una documentación interactiva de la api en la url:
+```
+http://url-del-deploy/swagger-ui.html
+```
+por ejemplo: *http://localhost:8080/swagger-ui.html*.
 
 ## 🛠️ Tecnologías Utilizadas
 
