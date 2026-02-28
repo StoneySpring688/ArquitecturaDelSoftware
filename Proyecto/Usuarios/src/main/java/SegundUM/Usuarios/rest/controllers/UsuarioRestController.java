@@ -5,11 +5,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import io.jsonwebtoken.Claims;
 
 import SegundUM.Usuarios.dominio.ResumenUsuario;
 import SegundUM.Usuarios.dominio.Usuario;
@@ -39,9 +44,10 @@ public class UsuarioRestController {
         this.servicioUsuarios = FactoriaServicios.getServicio(ServicioUsuarios.class);
     }
 
-    /** GET /usuarios — Obtener todos los usuarios */
+    /** GET /usuarios — Listado de usuarios (usuario autenticado) */
     @GET
     @Path("/")
+    @RolesAllowed("USUARIO")
     public Response getAllusuarios() throws ServicioException {
 
         List<ResumenUsuario> usuarios = servicioUsuarios.getAllUsuarios().stream()
@@ -56,9 +62,10 @@ public class UsuarioRestController {
         return Response.ok(usuarios).build();
     }
 
-    /** GET /usuarios/{id} — Obtener usuario por ID */
+    /** GET /usuarios/{id} — Recuperación de usuario (usuario autenticado) */
     @GET
     @Path("/{id}")
+    @RolesAllowed("USUARIO")
     public Response getUsuario(@PathParam("id") String id) throws ServicioException, EntidadNoEncontrada {
         Usuario usuario = servicioUsuarios.getUserById(id);
         ResumenUsuario resumen = new ResumenUsuario(usuario.getId(), usuario.getEmail(),
@@ -67,8 +74,9 @@ public class UsuarioRestController {
         return Response.ok(resumen).build();
     }
 
-    /** POST /usuarios — Registrar un nuevo usuario */
+    /** POST /usuarios — Alta de usuario (pública) */
     @POST
+    @PermitAll
     public Response registrarUsuario(
             @QueryParam("email") String email,
             @QueryParam("nombre") String nombre,
@@ -82,9 +90,10 @@ public class UsuarioRestController {
         return Response.created(nuevaURI).entity(id).build();
     }
 
-    /** POST /usuarios/login — Autenticar usuario */
+    /** POST /usuarios/login — Login (pública) */
     @POST
     @Path("/login")
+    @PermitAll
     public Response login(
             @QueryParam("email") String email,
             @QueryParam("clave") String clave) throws ServicioException {
@@ -95,16 +104,28 @@ public class UsuarioRestController {
         return Response.ok(resumen).build();
     }
 
-    /** PUT /usuarios/{id} — Modificar datos del usuario */
+    /** PUT /usuarios/{id} — Modificar usuario (autenticado, solo el propio usuario) */
     @PUT
     @Path("/{id}")
+    @RolesAllowed("USUARIO")
     public Response modificarUsuario(
             @PathParam("id") String usuarioId,
             @QueryParam("nombre") String nombre,
             @QueryParam("apellidos") String apellidos,
             @QueryParam("clave") String clave,
             @QueryParam("fechaNacimiento") String fechaNacimiento,
-            @QueryParam("telefono") String telefono) throws ServicioException {
+            @QueryParam("telefono") String telefono,
+            @Context ContainerRequestContext requestContext) throws ServicioException {
+
+        // Verificación: solo el propio usuario puede modificar sus datos
+        Claims claims = (Claims) requestContext.getProperty("claims");
+        String idUsuarioAutenticado = claims.getSubject();
+
+        if (!usuarioId.equals(idUsuarioAutenticado)) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("No tienes permiso para modificar este usuario.").build();
+        }
+
         LocalDate fecha = fechaNacimiento != null ? LocalDate.parse(fechaNacimiento) : null;
         servicioUsuarios.modificarUsuario(usuarioId, nombre, apellidos, clave, fecha, telefono);
         return Response.status(Response.Status.NO_CONTENT).build();
@@ -113,6 +134,7 @@ public class UsuarioRestController {
     /** DELETE /usuarios/{id} — Eliminar usuario */
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("USUARIO")
     public Response eliminarUsuario(@PathParam("id") String id) throws ServicioException, EntidadNoEncontrada {
         servicioUsuarios.deleteUserById(id);
         return Response.status(Response.Status.NO_CONTENT).build();

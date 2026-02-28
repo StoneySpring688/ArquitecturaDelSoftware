@@ -10,21 +10,18 @@ import org.springframework.stereotype.Repository;
 
 import SegundUM.Productos.dominio.Producto;
 
-
-
 /**
  * Implementación JPA del repositorio de productos.
  */
 
 @Repository
 public interface RepositorioProductosJPA extends RepositorioProductos, JpaRepository<Producto, String>, RepositorioProductosCustom {
-	
-	List<Producto> findByVendedorId(String vendedorId);
-	
-	// consulta con join fetch para que a la vez que trae el producto traiga su categoria y evitar LazyInicizlizationException
-	@Query("SELECT p FROM Producto p JOIN FETCH p.categoria c WHERE p.vendedorId = :vendedorId")
+
+    List<Producto> findByVendedorId(String vendedorId);
+
+    @Query("SELECT p FROM Producto p JOIN FETCH p.categoria c WHERE p.vendedorId = :vendedorId")
     List<Producto> getByVendedorConCategoria(@Param("vendedorId") String vendedorId);
-	
-	@Query("SELECT p FROM Producto p WHERE p.fechaPublicacion >= :inicio AND p.fechaPublicacion <= :fin")
+
+    @Query("SELECT p FROM Producto p WHERE p.fechaPublicacion >= :inicio AND p.fechaPublicacion <= :fin")
     List<Producto> getProductosPorFechas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 }

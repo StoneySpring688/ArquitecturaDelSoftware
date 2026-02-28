@@ -37,7 +37,7 @@ public class Usuario implements Identificable {
     
     /**
      * TODO
-     * Este atributo hay que revisarlo, a ser psible en el laboratorio de prácticas,
+     * Este atributo hay que revisarlo, a ser posible en el laboratorio de prácticas,
      * puede que lo mejor sea una nueva consulta sql en el microservicio de productos
      * si se mantiene este atributo habrá que mantenerlo cada vez que el usuario publique un producto
      **/

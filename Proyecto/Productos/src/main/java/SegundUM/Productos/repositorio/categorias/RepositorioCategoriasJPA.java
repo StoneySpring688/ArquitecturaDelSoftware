@@ -14,15 +14,11 @@ import SegundUM.Productos.dominio.Categoria;
 
 @Repository
 public interface RepositorioCategoriasJPA extends RepositorioCategorias, JpaRepository<Categoria, String>, RepositorioCategoriasCustom {
-    
-	@Override
+
+    @Override
     @Query("SELECT c FROM Categoria c WHERE c.categoriaPadre IS NULL")
     List<Categoria> getCategoriasRaiz();
-    
-    // existe ya viene implementado en el CrudRepository de Spring
-    
+
     @Override
-    // @Query("SELECT c FROM Categoria c WHERE LOWER(c.nombre) LIKE LOWER(:nombre)")
-    public List<Categoria> findByNombreContainingIgnoreCase(String nombre);
-    
+    List<Categoria> findByNombreContainingIgnoreCase(String nombre);
 }
