@@ -2,6 +2,7 @@ package SegundUM.Productos.repositorio.categorias;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -13,7 +14,7 @@ import SegundUM.Productos.dominio.Categoria;
  */
 
 @NoRepositoryBean
-public interface RepositorioCategorias extends CrudRepository<Categoria, String> {
+public interface RepositorioCategorias extends  JpaRepository<Categoria, String> {
 
     /**
      * Recupera todas las categorías raíz (sin padre).
