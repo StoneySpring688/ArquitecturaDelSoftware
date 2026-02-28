@@ -1,27 +1,30 @@
 package SegundUM.Productos.repositorio.categorias;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import SegundUM.Productos.dominio.Categoria;
-import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 
+/**
+ * Implementación de los métodos custom de RepositorioCategoriasJPA.
+ * Spring Data detecta esta clase por la convención de nombre (Impl).
+ */
 public class RepositorioCategoriasCustomImpl implements RepositorioCategoriasCustom {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public List<Categoria> getDescendientes(String categoriaId) throws EntidadNoEncontrada {
+    public List<Categoria> getDescendientes(String categoriaId) {
         Categoria categoria = em.find(Categoria.class, categoriaId);
-        
+
         if (categoria == null) {
-            throw new EntidadNoEncontrada("Categoría con id " + categoriaId + " no encontrada");
+            return Collections.emptyList();
         }
-        
-        return categoria.obtenerDescendientes(); 
-        
+
+        return categoria.obtenerDescendientes();
     }
 }

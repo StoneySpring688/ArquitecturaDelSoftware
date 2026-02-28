@@ -16,9 +16,8 @@ import SegundUM.Productos.dominio.LugarRecogida;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
-import SegundUM.Productos.repositorio.RepositorioException;
-import SegundUM.Productos.repositorio.categorias.RepositorioCategorias;
-import SegundUM.Productos.repositorio.productos.RepositorioProductos;
+import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasJPA;
+import SegundUM.Productos.repositorio.productos.RepositorioProductosJPA;
 import SegundUM.Productos.servicio.ServicioException;
 
 /**
@@ -30,12 +29,12 @@ import SegundUM.Productos.servicio.ServicioException;
 public class ServicioProductosImpl implements ServicioProductos {
 
 	private final Logger logger = LoggerFactory.getLogger(ServicioProductosImpl.class);
-	
-    private final RepositorioProductos repositorioProductos;
-    private final RepositorioCategorias repositorioCategorias;
+
+    private final RepositorioProductosJPA repositorioProductos;
+    private final RepositorioCategoriasJPA repositorioCategorias;
 
     @Autowired
-    public ServicioProductosImpl(RepositorioCategorias repositorioCategorias, RepositorioProductos repositorioProductos) {
+    public ServicioProductosImpl(RepositorioCategoriasJPA repositorioCategorias, RepositorioProductosJPA repositorioProductos) {
         this.repositorioProductos = repositorioProductos;
         this.repositorioCategorias = repositorioCategorias;
     }
@@ -89,52 +88,34 @@ public class ServicioProductosImpl implements ServicioProductos {
 
     @Override
     public List<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor) throws ServicioException {
-    	
+
     	String vendedorId = null;
     	if (emailVendedor != null) {
     		logger.info("USANDO VALOR DE PRUEBAS PARA ID DEL VENDEDOR, SE DEBE REEMPLAZAR POR LA CONSULTA A LA API DE USUARIOS");
             // TODO: vendedorId = clienteHttpUsuarios.obtenerIdPorEmail(emailVendedor);
-            
+
             vendedorId = "ID-TEMPORAL-PARA-PRUEBAS"; // TODO tempooral para pruebas sin la api
        }
-    	try {
-            return repositorioProductos.getHistorialMes(mes, anio, vendedorId);
-        } catch (RepositorioException e) {
-            throw new ServicioException("Error al obtener historial del mes", e);
-        }
+    	return repositorioProductos.getHistorialMes(mes, anio, vendedorId);
     }
 
     @Override
     public List<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo) throws ServicioException {
-    	
-        try {
-        	logger.info("Buscando productos con filtros - Categoría ID: " + categoriaId + ", Texto: " + texto + ", Estado mínimo: " + estadoMinimo + ", Precio máximo: " + precioMaximo);
-            return repositorioProductos.buscarProductos(categoriaId, texto, estadoMinimo, precioMaximo);
-        } catch (RepositorioException e) {
-        	logger.error("Error buscando productos con los filtros proporcionados", e);
-            throw new ServicioException("Error buscando productos", e);
-        }
+
+    	logger.info("Buscando productos con filtros - Categoría ID: " + categoriaId + ", Texto: " + texto + ", Estado mínimo: " + estadoMinimo + ", Precio máximo: " + precioMaximo);
+        return repositorioProductos.buscarProductos(categoriaId, texto, estadoMinimo, precioMaximo);
     }
 
 	@Override
 	public List<ResumenProducto> historialMes(int mes, int anio) throws ServicioException {
-		
-		try {
-            return repositorioProductos.getHistorialMes(mes, anio);
-        } catch (RepositorioException e) {
-            throw new ServicioException("Error al obtener historial del mes", e);
-        }
+
+		return repositorioProductos.getHistorialMes(mes, anio);
 	}
-	
+
 	@Override
     public List<Producto> getProductosPorVendedor(String vendedorId) throws ServicioException {
-		
-        try {
-            return repositorioProductos.getByVendedorConCategoria(vendedorId);
-        } catch (RepositorioException e) {
-            // logger.error("Error al recuperar productos del vendedor: " + vendedorId, e);
-            throw new ServicioException("Error al obtener los productos del vendedor", e);
-        }
+
+        return repositorioProductos.getByVendedorConCategoria(vendedorId);
     }
 	
 	@Override

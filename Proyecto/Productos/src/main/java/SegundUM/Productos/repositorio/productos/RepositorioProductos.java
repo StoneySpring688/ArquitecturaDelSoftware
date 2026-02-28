@@ -10,7 +10,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
-import SegundUM.Productos.repositorio.RepositorioException;
 
 
 /**
@@ -19,12 +18,12 @@ import SegundUM.Productos.repositorio.RepositorioException;
 
 @NoRepositoryBean
 public interface RepositorioProductos extends CrudRepository<Producto, String> {
-    
+
     /**
      * Obtiene los productos de un vendedor.
      */
-    List<Producto> findByVendedorId(String vendedorId) throws RepositorioException;
-    
+    List<Producto> findByVendedorId(String vendedorId);
+
     /**
      * Busca productos por categoría, descripción, estado y precio máximo.
      * Todos los parámetros son opcionales (pueden ser null).
@@ -34,22 +33,22 @@ public interface RepositorioProductos extends CrudRepository<Producto, String> {
         String textoBusqueda,
         EstadoProducto estadoMinimo,
         BigDecimal precioMaximo
-    ) throws RepositorioException;
-    
+    );
+
     /**
      * Obtiene el historial del mes de un vendedor, ordenado por visualizaciones.
      */
-    List<ResumenProducto> getHistorialMes(int mes, int anio, String vendedorId) throws RepositorioException;
-    
+    List<ResumenProducto> getHistorialMes(int mes, int anio, String vendedorId);
+
     /**
      * Obtiene el historial del mes ordenado por visualizaciones.
      */
-    List<ResumenProducto> getHistorialMes(int mes, int anio) throws RepositorioException;
-    
+    List<ResumenProducto> getHistorialMes(int mes, int anio);
+
     /**
      * Obtiene productos publicados en un rango de fechas.
      */
-    List<Producto> getProductosPorFechas(LocalDateTime inicio, LocalDateTime fin) throws RepositorioException;
-    
-    List<Producto> getByVendedorConCategoria(String vendedorId) throws RepositorioException; 
+    List<Producto> getProductosPorFechas(LocalDateTime inicio, LocalDateTime fin);
+
+    List<Producto> getByVendedorConCategoria(String vendedorId);
 }

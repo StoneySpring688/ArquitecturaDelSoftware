@@ -8,11 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
-import SegundUM.Productos.repositorio.categorias.RepositorioCategorias;
+import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasJPA;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasXML;
 import SegundUM.Productos.servicio.ServicioException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -23,11 +24,11 @@ import java.util.stream.StreamSupport;
 public class ServicioCategoriasImpl implements ServicioCategorias {
 	private static final Logger logger = LoggerFactory.getLogger(ServicioCategoriasImpl.class);
 
-    private final RepositorioCategorias repositorioCategorias;
+    private final RepositorioCategoriasJPA repositorioCategorias;
     private final RepositorioCategoriasXML repositorioCategoriasXML;
 
     @Autowired
-    public ServicioCategoriasImpl(RepositorioCategorias repositorioCategorias) {
+    public ServicioCategoriasImpl(RepositorioCategoriasJPA repositorioCategorias) {
         this.repositorioCategorias = repositorioCategorias;
         this.repositorioCategoriasXML = new RepositorioCategoriasXML();
     }
@@ -66,14 +67,12 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
 
     @Override
     public List<Categoria> getDescendientes(String categoriaId) throws ServicioException {
-        try {
-        	logger.info("Recuperando descendientes de la categoría con ID " + categoriaId);
-            return repositorioCategorias.getDescendientes(categoriaId);
-        } catch (EntidadNoEncontrada e) {
-            // VERIFICACIÓN: la categoría no existe
-        	logger.error("La categoría con ID " + categoriaId + " no existe en el sistema", e);
-            throw new ServicioException("La categoría con ID " + categoriaId + " no existe en el sistema", e);
+    	logger.info("Recuperando descendientes de la categoría con ID " + categoriaId);
+        List<Categoria> descendientes = repositorioCategorias.getDescendientes(categoriaId);
+        if (descendientes.isEmpty()) {
+            logger.warn("No se encontraron descendientes para la categoría con ID " + categoriaId);
         }
+        return descendientes;
     }
     
     @Override
@@ -90,7 +89,7 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
 
     @Override
     public List<Categoria> getCategorias() throws ServicioException {
-    	List<Categoria> categorias = StreamSupport.stream(repositorioCategorias.findAll().spliterator(), false).toList();
+    	List<Categoria> categorias = StreamSupport.stream(repositorioCategorias.findAll().spliterator(), false).collect(Collectors.toList());
     	
     	if (categorias.isEmpty()) {
 			logger.warn("No se encontraron categorías en el sistema");

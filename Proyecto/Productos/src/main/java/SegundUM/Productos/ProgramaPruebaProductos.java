@@ -12,6 +12,7 @@ import SegundUM.Productos.controller.ControllerProductos;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
+import SegundUM.Productos.rest.App;
 
 public class ProgramaPruebaProductos {
 
@@ -22,7 +23,7 @@ public class ProgramaPruebaProductos {
     	
     	// iniciar contexto del main de SpringBoot
     	ConfigurableApplicationContext contexto =
-    			SpringApplication.run(ProductosApp.class, args);
+    			SpringApplication.run(App.class, args);
     	
         logger.info("=== INICIO DE PRUEBAS DEL MICROSERVICIO DE PRODUCTOS ===");
 
