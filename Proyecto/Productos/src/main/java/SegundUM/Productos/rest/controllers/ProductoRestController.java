@@ -3,6 +3,7 @@ package SegundUM.Productos.rest.controllers;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
+import SegundUM.Productos.rest.dto.ProductoDTO;
 import SegundUM.Productos.servicio.ServicioException;
 import SegundUM.Productos.servicio.productos.ServicioProductos;
 
@@ -44,9 +46,9 @@ public class ProductoRestController {
 
     /** GET /productos/{id} — Obtener un producto por ID */
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> getProducto(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
+    public ResponseEntity<ProductoDTO> getProducto(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
         Producto p = servicioProductos.getProductoPorId(id);
-        return ResponseEntity.ok(p);
+        return ResponseEntity.ok(ProductoDTO.fromEntity(p));
     }
 
     /** POST /productos — Dar de alta un producto */
@@ -101,7 +103,7 @@ public class ProductoRestController {
 
     /** GET /productos/buscar — Buscar productos con filtros opcionales */
     @GetMapping("/buscar")
-    public ResponseEntity<List<Producto>> buscarProductos(
+    public ResponseEntity<List<ProductoDTO>> buscarProductos(
     		@RequestParam(required = false) String categoriaId,
     		@RequestParam(required = false) String texto,
     		@RequestParam(required = false) EstadoProducto estadoMinimo,
@@ -109,14 +111,24 @@ public class ProductoRestController {
     				throws ServicioException {
         List<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
                 estadoMinimo, precioMaximo);
-        return ResponseEntity.ok(productos);
+        
+        List<ProductoDTO> productosDtos = productos.stream()
+                .map(ProductoDTO::fromEntity)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(productosDtos);
     }
 
     /** GET /productos/vendedor/{vendedorId} — Obtener productos de un vendedor */
     @GetMapping("/vendedor/{vendedorId}")
-    public ResponseEntity<List<Producto>> getProductosPorVendedor(@PathVariable String vendedorId) throws ServicioException {
+    public ResponseEntity<List<ProductoDTO>> getProductosPorVendedor(@PathVariable String vendedorId) throws ServicioException {
         List<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId);
-        return ResponseEntity.ok(productos);
+        
+        List<ProductoDTO> productosDtos = productos.stream()
+				.map(ProductoDTO::fromEntity)
+				.collect(Collectors.toList());
+        
+        return ResponseEntity.ok(productosDtos);
     }
 
     /** GET /productos/historial?mes=X&anio=Y — Resumen mensual de productos */
