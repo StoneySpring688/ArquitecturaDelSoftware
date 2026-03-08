@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,16 +102,24 @@ public class ServicioProductosImpl implements ServicioProductos {
     }
 
     @Override
+    @Deprecated
     public List<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo) throws ServicioException {
 
     	logger.info("Buscando productos con filtros - Categoría ID: " + categoriaId + ", Texto: " + texto + ", Estado mínimo: " + estadoMinimo + ", Precio máximo: " + precioMaximo);
         return repositorioProductos.buscarProductos(categoriaId, texto, estadoMinimo, precioMaximo);
     }
+    
+    @Override
+    public Page<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo, Pageable pageable) throws ServicioException {
+        logger.info("Buscando productos (Paginado) - Cat: " + categoriaId + ", Txt: " + texto + ", Pág: " + pageable.getPageNumber());
+        
+        return repositorioProductos.buscarProductos(categoriaId, texto, estadoMinimo, precioMaximo, pageable);
+    }
 
 	@Override
 	public List<ResumenProducto> historialMes(int mes, int anio) throws ServicioException {
 
-		return repositorioProductos.getHistorialMes(mes, anio);
+		return repositorioProductos.getHistorialMes(mes, anio, null);
 	}
 
 	@Override

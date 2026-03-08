@@ -4,9 +4,11 @@ import java.io.Serializable;
 
 import javax.validation.constraints.*;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import SegundUM.Productos.dominio.LugarRecogida;
 
-public class LugarRecogidaDTO implements Serializable {
+public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> implements Serializable {
     private static final long serialVersionUID = 8886619346871580550L;
     
     @NotBlank(message = "La descripción del lugar es obligatoria")

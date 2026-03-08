@@ -4,9 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.hateoas.RepresentationModel;
+
 import SegundUM.Productos.dominio.Categoria;
 
-public class CategoriaDTO implements Serializable{
+public class CategoriaDTO extends RepresentationModel<CategoriaDTO> implements Serializable{
     private static final long serialVersionUID = 2411619210493134069L;
 	public String id;
     public String nombre;

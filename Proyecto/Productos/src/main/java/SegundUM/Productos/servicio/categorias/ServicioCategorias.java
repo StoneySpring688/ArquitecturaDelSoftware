@@ -2,6 +2,9 @@ package SegundUM.Productos.servicio.categorias;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.servicio.ServicioException;
@@ -40,7 +43,10 @@ public interface ServicioCategorias {
     Categoria buscarCategoriaPorNombre(String nombre) throws ServicioException;
 
     Categoria getCategoriaById(String id) throws ServicioException, EntidadNoEncontrada;
-
+    
+    @Deprecated
     List<Categoria> getCategorias() throws ServicioException ;
+    
+    Page<Categoria> getCategoriasPaginado(Pageable pageable);
 
 }

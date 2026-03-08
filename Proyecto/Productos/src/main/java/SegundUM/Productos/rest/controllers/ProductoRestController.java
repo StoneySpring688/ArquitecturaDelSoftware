@@ -7,7 +7,11 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +47,9 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
 public class ProductoRestController {
 	
     private final ServicioProductos servicioProductos;
+    
+    @Autowired
+    private PagedResourcesAssembler<ProductoDTO> pagedResourcesAssembler;
 
     @Autowired
     public ProductoRestController(ServicioProductos servicioProductos) {
@@ -100,18 +107,17 @@ public class ProductoRestController {
 
     /** GET /productos/buscar — Buscar productos con filtros opcionales */
     @GetMapping("/buscar")
-    public ResponseEntity<List<ProductoDTO>> buscarProductos(
+    public ResponseEntity<Page<ProductoDTO>> buscarProductos(
     		@RequestParam(required = false) String categoriaId,
     		@RequestParam(required = false) String texto,
     		@RequestParam(required = false) EstadoProducto estadoMinimo,
-    		@RequestParam(required = false) BigDecimal precioMaximo) 
+    		@RequestParam(required = false) BigDecimal precioMaximo,
+    		@ParameterObject Pageable paginacion)
     				throws ServicioException {
-        List<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
-                estadoMinimo, precioMaximo);
+        Page<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
+                estadoMinimo, precioMaximo, paginacion);
         
-        List<ProductoDTO> productosDtos = productos.stream()
-                .map(ProductoDTO::fromEntity)
-                .collect(Collectors.toList());
+        Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
         
         return ResponseEntity.ok(productosDtos);
     }

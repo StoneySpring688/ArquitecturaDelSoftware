@@ -7,11 +7,12 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.RepresentationModel;
 
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 
-public class ProductoDTO implements Serializable {
+public class ProductoDTO extends RepresentationModel<ProductoDTO> implements Serializable {
     
     private static final long serialVersionUID = 7064953061294088595L;
 	public String id;

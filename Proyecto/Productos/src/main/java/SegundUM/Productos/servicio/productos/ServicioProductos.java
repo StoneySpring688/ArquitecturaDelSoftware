@@ -3,6 +3,9 @@ package SegundUM.Productos.servicio.productos;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
@@ -56,7 +59,10 @@ public interface ServicioProductos {
     /**
      * Buscar productos con los criterios opcionales.
      */
+    @Deprecated
     List<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo) throws ServicioException;
+    
+    Page<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo, Pageable pageable) throws ServicioException;
     
     /**
      * Recupera los productos publicados por un vendedor específico.

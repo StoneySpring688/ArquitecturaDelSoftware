@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.validation.constraints.*;
 
-public class ProductoUpdateDTO implements Serializable {
+import org.springframework.hateoas.RepresentationModel;
+
+public class ProductoUpdateDTO extends RepresentationModel<ProductoUpdateDTO> implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
