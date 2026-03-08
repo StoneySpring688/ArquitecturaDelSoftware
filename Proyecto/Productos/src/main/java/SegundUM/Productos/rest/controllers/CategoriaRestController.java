@@ -40,10 +40,13 @@ public class CategoriaRestController {
         
     }
 
-    /** GET /categorias/ — Listar todas las categorías */
+    /** GET /categorias/ — Listar todas las categorías
+     *  <br>
+     *  Muestra las categorias como la raíz y sus hijas, para evitar duplicidad (si no, no funciona con el swagger ui)*/
     @GetMapping
     public ResponseEntity<List<CategoriaDTO>> getCategorias() throws ServicioException {
     	List<CategoriaDTO> categoriasDTO = servicioCategorias.getCategorias().stream()
+    			.filter(c -> c.getCategoriaPadre() == null)
     			.map(CategoriaDTO::fromEntity)
     			.toList();
         return ResponseEntity.ok(categoriasDTO);
