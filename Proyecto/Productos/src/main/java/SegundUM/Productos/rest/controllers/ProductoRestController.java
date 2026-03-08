@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +24,9 @@ import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
+import SegundUM.Productos.rest.dto.LugarRecogidaDTO;
 import SegundUM.Productos.rest.dto.ProductoDTO;
+import SegundUM.Productos.rest.dto.ProductoUpdateDTO;
 import SegundUM.Productos.servicio.ServicioException;
 import SegundUM.Productos.servicio.productos.ServicioProductos;
 
@@ -53,17 +58,11 @@ public class ProductoRestController {
 
     /** POST /productos — Dar de alta un producto */
     @PostMapping
-    public ResponseEntity<Void> altaProducto(
-            @RequestParam String titulo,
-            @RequestParam String descripcion,
-            @RequestParam BigDecimal precio,
-            @RequestParam EstadoProducto estado,
-            @RequestParam String categoriaId,
-            @RequestParam boolean envioDisponible,
-            @RequestParam String vendedorId) 
+    public ResponseEntity<Void> altaProducto(@Valid @RequestBody ProductoDTO dto) 
             		throws ServicioException {
-        String id = servicioProductos.altaProducto(titulo, descripcion, precio, estado,
-                categoriaId, envioDisponible, vendedorId);
+        String id = servicioProductos.altaProducto(dto.titulo, dto.descripcion, dto.precio, dto.estado,
+        		dto.categoriaId, dto.envioDisponible, dto.vendedorId);
+        
         URI nuevaURI = ServletUriComponentsBuilder.fromCurrentRequest()
         		.path("/{id}")
         		.buildAndExpand(id)
@@ -74,11 +73,10 @@ public class ProductoRestController {
     /** PUT /productos/{id} — Modificar precio y/o descripción (con verificación de propietario) */
     @PutMapping("/{id}")
     public ResponseEntity<Producto> modificarProducto(
-            @PathVariable("id") String productoId,
-            @RequestParam(name = "descripcion", required = false) String nuevaDescripcion,
-            @RequestParam(name = "precio", required = false) BigDecimal nuevoPrecio,
-            @RequestParam String usuarioId) throws ServicioException {
-        servicioProductos.modificarProducto(productoId, nuevaDescripcion, nuevoPrecio, usuarioId);
+    		@PathVariable("id") String productoId,
+            @Valid @RequestBody ProductoUpdateDTO dto) throws ServicioException {
+    	
+        servicioProductos.modificarProducto(productoId, dto.descripcion, dto.precio, dto.vendedorId);
         return ResponseEntity.noContent().build();
     }
 
@@ -86,11 +84,10 @@ public class ProductoRestController {
     @PutMapping("/{id}/recogida")
     public ResponseEntity<Void> asociarLugarRecogida(
             @PathVariable("id") String productoId,
-            @RequestParam String descripcion,
-            @RequestParam Double longitud,
-            @RequestParam Double latitud) 
+           @Valid @RequestBody LugarRecogidaDTO dto) 
             		throws ServicioException {
-        servicioProductos.asignarLugarRecogida(productoId, descripcion, longitud, latitud);
+    	
+        servicioProductos.asignarLugarRecogida(productoId, dto.descripcion, dto.longitud, dto.latitud);
         return ResponseEntity.noContent().build();
     }
 
