@@ -1,13 +1,15 @@
 package SegundUM.Productos.rest.dto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 
-public class ProductoDTO {
+public class ProductoDTO implements Serializable {
     
-    public String id;
+    private static final long serialVersionUID = -7064953061294088595L;
+	public String id;
     public String titulo;
     public String descripcion;
     public BigDecimal precio;

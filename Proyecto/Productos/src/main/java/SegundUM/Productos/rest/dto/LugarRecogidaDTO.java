@@ -1,9 +1,12 @@
 package SegundUM.Productos.rest.dto;
 
+import java.io.Serializable;
+
 import SegundUM.Productos.dominio.LugarRecogida;
 
-public class LugarRecogidaDTO {
-    public String descripcion;
+public class LugarRecogidaDTO implements Serializable {
+    private static final long serialVersionUID = 8886619346871580550L;
+	public String descripcion;
     public Double longitud;
     public Double latitud;
 
