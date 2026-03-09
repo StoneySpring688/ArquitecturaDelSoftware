@@ -3,10 +3,13 @@ package SegundUM.Productos.servicio.categorias;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import SegundUM.Productos.dominio.Categoria;
+import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasJPA;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasXML;
@@ -87,6 +90,7 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
        
     }
 
+    @Deprecated
     @Override
     public List<Categoria> getCategorias() throws ServicioException {
     	List<Categoria> categorias = StreamSupport.stream(repositorioCategorias.findAll().spliterator(), false).collect(Collectors.toList());
@@ -99,6 +103,11 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
 		}
     	
 		return categorias;
+    }
+    
+    @Override
+    public Page<Categoria> getCategoriasPaginado(Pageable pageable) {
+        return repositorioCategorias.getCategoriasRaiz(pageable);
     }
     
 }

@@ -11,6 +11,7 @@ import SegundUM.Productos.dominio.ResumenProducto;
  * Interfaz custom para queries complejas de productos.
  * Implementada en RepositorioProductosImpl.
  */
+@Deprecated(since = "refactor: simplificación repositorio productos - prodcutosRestImprovements", forRemoval = true)
 public interface RepositorioProductosCustom {
 
     List<Producto> buscarProductos(

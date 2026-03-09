@@ -19,6 +19,7 @@ import SegundUM.Productos.dominio.ResumenProducto;
  * Implementación de los métodos custom de RepositorioProductosJPA.
  * Spring Data detecta esta clase por la convención de nombre (Impl).
  */
+@Deprecated(since = "refactor: simplificación repositorio productos - prodcutosRestImprovements", forRemoval = true)
 public class RepositorioProductosCustomImpl implements RepositorioProductosCustom {
 
     @PersistenceContext

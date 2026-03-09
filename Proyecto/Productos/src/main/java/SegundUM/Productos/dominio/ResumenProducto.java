@@ -12,6 +12,8 @@ public class ResumenProducto {
     private String nombreCategoria;
     private Integer visualizaciones;
     
+    public ResumenProducto() {}
+    
     public ResumenProducto(String id, String titulo, BigDecimal precio, 
                            LocalDateTime fechaPublicacion, String nombreCategoria, 
                            Integer visualizaciones) {
@@ -21,6 +23,20 @@ public class ResumenProducto {
         this.fechaPublicacion = fechaPublicacion;
         this.nombreCategoria = nombreCategoria;
         this.visualizaciones = visualizaciones;
+    }
+    
+    public static ResumenProducto fromEntity(Producto p) {
+        if (p == null) return null;
+        
+        ResumenProducto resumen = new ResumenProducto();
+        resumen.id = p.getId();
+        resumen.titulo = p.getTitulo();
+        resumen.precio = p.getPrecio();
+        resumen.fechaPublicacion = p.getFechaPublicacion();
+        resumen.nombreCategoria = p.getCategoria() != null ? p.getCategoria().getNombre() : null;
+        resumen.visualizaciones = p.getVisualizaciones();
+        
+        return resumen;
     }
     
     // Getters

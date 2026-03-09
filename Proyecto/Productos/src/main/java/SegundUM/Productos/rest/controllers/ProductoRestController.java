@@ -2,15 +2,23 @@ package SegundUM.Productos.rest.controllers;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.List;
 
+import javax.validation.Valid;
+
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +28,9 @@ import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
+import SegundUM.Productos.rest.dto.LugarRecogidaDTO;
+import SegundUM.Productos.rest.dto.ProductoDTO;
+import SegundUM.Productos.rest.dto.ProductoUpdateDTO;
 import SegundUM.Productos.servicio.ServicioException;
 import SegundUM.Productos.servicio.productos.ServicioProductos;
 
@@ -36,6 +47,12 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
 public class ProductoRestController {
 	
     private final ServicioProductos servicioProductos;
+    
+    @Autowired
+    private PagedResourcesAssembler<ProductoDTO> pagedResourcesAssembler;
+    
+    @Autowired
+    private PagedResourcesAssembler<ResumenProducto> pagedResourcesAssemblerRP; // TODO quitar este apaño para devolver ProductoDTO (quitar dto antiguo)
 
     @Autowired
     public ProductoRestController(ServicioProductos servicioProductos) {
@@ -44,24 +61,18 @@ public class ProductoRestController {
 
     /** GET /productos/{id} — Obtener un producto por ID */
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> getProducto(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
+    public ResponseEntity<ProductoDTO> getProducto(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
         Producto p = servicioProductos.getProductoPorId(id);
-        return ResponseEntity.ok(p);
+        return ResponseEntity.ok(ProductoDTO.fromEntity(p));
     }
 
     /** POST /productos — Dar de alta un producto */
     @PostMapping
-    public ResponseEntity<Void> altaProducto(
-            @RequestParam String titulo,
-            @RequestParam String descripcion,
-            @RequestParam BigDecimal precio,
-            @RequestParam EstadoProducto estado,
-            @RequestParam String categoriaId,
-            @RequestParam boolean envioDisponible,
-            @RequestParam String vendedorId) 
+    public ResponseEntity<Void> altaProducto(@Valid @RequestBody ProductoDTO dto) 
             		throws ServicioException {
-        String id = servicioProductos.altaProducto(titulo, descripcion, precio, estado,
-                categoriaId, envioDisponible, vendedorId);
+        String id = servicioProductos.altaProducto(dto.titulo, dto.descripcion, dto.precio, dto.estado,
+        		dto.categoriaId, dto.envioDisponible, dto.vendedorId);
+        
         URI nuevaURI = ServletUriComponentsBuilder.fromCurrentRequest()
         		.path("/{id}")
         		.buildAndExpand(id)
@@ -72,11 +83,10 @@ public class ProductoRestController {
     /** PUT /productos/{id} — Modificar precio y/o descripción (con verificación de propietario) */
     @PutMapping("/{id}")
     public ResponseEntity<Producto> modificarProducto(
-            @PathVariable("id") String productoId,
-            @RequestParam(name = "descripcion", required = false) String nuevaDescripcion,
-            @RequestParam(name = "precio", required = false) BigDecimal nuevoPrecio,
-            @RequestParam String usuarioId) throws ServicioException {
-        servicioProductos.modificarProducto(productoId, nuevaDescripcion, nuevoPrecio, usuarioId);
+    		@PathVariable("id") String productoId,
+            @Valid @RequestBody ProductoUpdateDTO dto) throws ServicioException {
+    	
+        servicioProductos.modificarProducto(productoId, dto.descripcion, dto.precio, dto.vendedorId);
         return ResponseEntity.noContent().build();
     }
 
@@ -84,11 +94,10 @@ public class ProductoRestController {
     @PutMapping("/{id}/recogida")
     public ResponseEntity<Void> asociarLugarRecogida(
             @PathVariable("id") String productoId,
-            @RequestParam String descripcion,
-            @RequestParam Double longitud,
-            @RequestParam Double latitud) 
+           @Valid @RequestBody LugarRecogidaDTO dto) 
             		throws ServicioException {
-        servicioProductos.asignarLugarRecogida(productoId, descripcion, longitud, latitud);
+    	
+        servicioProductos.asignarLugarRecogida(productoId, dto.descripcion, dto.longitud, dto.latitud);
         return ResponseEntity.noContent().build();
     }
 
@@ -101,43 +110,55 @@ public class ProductoRestController {
 
     /** GET /productos/buscar — Buscar productos con filtros opcionales */
     @GetMapping("/buscar")
-    public ResponseEntity<List<Producto>> buscarProductos(
+    public PagedModel<EntityModel<ProductoDTO>> buscarProductos(
     		@RequestParam(required = false) String categoriaId,
     		@RequestParam(required = false) String texto,
     		@RequestParam(required = false) EstadoProducto estadoMinimo,
-    		@RequestParam(required = false) BigDecimal precioMaximo) 
+    		@RequestParam(required = false) BigDecimal precioMaximo,
+    		@ParameterObject Pageable paginacion)
     				throws ServicioException {
-        List<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
-                estadoMinimo, precioMaximo);
-        return ResponseEntity.ok(productos);
+        Page<Producto> productos = servicioProductos.buscarProductos(categoriaId, texto,
+                estadoMinimo, precioMaximo, paginacion);
+        
+        Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
+        
+        return pagedResourcesAssembler.toModel(productosDtos);
     }
 
     /** GET /productos/vendedor/{vendedorId} — Obtener productos de un vendedor */
     @GetMapping("/vendedor/{vendedorId}")
-    public ResponseEntity<List<Producto>> getProductosPorVendedor(@PathVariable String vendedorId) throws ServicioException {
-        List<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId);
-        return ResponseEntity.ok(productos);
+    public PagedModel<EntityModel<ProductoDTO>> getProductosPorVendedor(
+    		@PathVariable String vendedorId,
+    		@ParameterObject Pageable paginacion) 
+    				throws ServicioException {
+        Page<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId, paginacion);
+        
+        Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
+        
+        return pagedResourcesAssembler.toModel(productosDtos);
     }
 
     /** GET /productos/historial?mes=X&anio=Y — Resumen mensual de productos */
     @GetMapping("/historial")
-    public ResponseEntity<List<ResumenProducto>> historialMes(
+    public PagedModel<EntityModel<ResumenProducto>> historialMes(
     		@RequestParam int mes,
-    		@RequestParam int anio) 
+    		@RequestParam int anio,
+    		@ParameterObject Pageable paginacion) 
     				throws ServicioException {
-        List<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio);
-        return ResponseEntity.ok(resumen);
+        Page<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio, paginacion);
+        return pagedResourcesAssemblerRP.toModel(resumen);
     }
 
     /** GET /productos/historial/{email}?mes=X&anio=Y — Resumen mensual de un vendedor */
     @GetMapping("/historial/{email}")
-    public ResponseEntity<List<ResumenProducto>> historialMesVendedor(
+    public PagedModel<EntityModel<ResumenProducto>> historialMesVendedor(
             @PathVariable("email") String emailVendedor,
             @RequestParam int mes,
-            @RequestParam int anio) 
+            @RequestParam int anio,
+            @ParameterObject Pageable paginacion) 
             		throws ServicioException {
-        List<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor);
-        return ResponseEntity.ok(resumen);
+        Page<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor, paginacion);
+        return pagedResourcesAssemblerRP.toModel(resumen);
     }
 
     /** DELETE /productos/{id} — Eliminar un producto */
