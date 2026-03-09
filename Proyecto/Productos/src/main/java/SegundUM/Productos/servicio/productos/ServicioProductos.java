@@ -49,6 +49,7 @@ public interface ServicioProductos {
     /**
      * Historial del mes de un vendedor: devuelve resumen ordenado por visualizaciones (desc).
      */
+    // TODO quitar este apaño para devolver Producto (quitar dto antiguo)
     @Deprecated
     List<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor) throws ServicioException;
     Page<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor, Pageable pageable) throws ServicioException;
@@ -56,6 +57,7 @@ public interface ServicioProductos {
     /**
      * Historial del mes de: devuelve resumen ordenado por visualizaciones (desc).
      */
+    // TODO quitar este apaño para devolver Producto (quitar dto antiguo)
     @Deprecated
     List<ResumenProducto> historialMes(int mes, int anio) throws ServicioException;
     Page<ResumenProducto> historialMes(int mes, int anio, Pageable pageable) throws ServicioException;

@@ -3,6 +3,10 @@ package SegundUM.Productos.rest.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +31,9 @@ import SegundUM.Productos.servicio.categorias.ServicioCategorias;
 public class CategoriaRestController implements CategoriasApi {
 
     private final ServicioCategorias servicioCategorias;
+    
+    @Autowired
+    private PagedResourcesAssembler<CategoriaDTO> pagedResourcesAssembler;
 
     @Autowired
     public CategoriaRestController(ServicioCategorias servicioCategorias) {
@@ -35,8 +42,14 @@ public class CategoriaRestController implements CategoriasApi {
 
     /** GET /categorias/{id} — Obtener una categoría por ID */
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaDTO> getCategoria(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
-        return ResponseEntity.ok(CategoriaDTO.fromEntity(servicioCategorias.getCategoriaById(id)));
+    public EntityModel<CategoriaDTO> getCategoria(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
+        return EntityModel.of(CategoriaDTO.fromEntity(servicioCategorias.getCategoriaById(id)))
+        		.add(
+        				WebMvcLinkBuilder.linkTo(
+        						WebMvcLinkBuilder.methodOn(CategoriaRestController.class).getCategoria(id)
+        						)
+        				.withSelfRel()
+        				);
         
     }
 
@@ -49,12 +62,12 @@ public class CategoriaRestController implements CategoriasApi {
     			.filter(c -> c.getCategoriaPadre() == null)
     			.map(CategoriaDTO::fromEntity)
     			.toList();
-        return ResponseEntity.ok(categoriasDTO);
+        return ResponseEntity.ok(categoriasDTO);  
     }*/
     @Override
-    public ResponseEntity<Page<CategoriaDTO>> getCategoriasPaginado(Pageable paginacion) throws ServicioException {
+    public PagedModel<EntityModel<CategoriaDTO>> getCategoriasPaginado(Pageable paginacion) throws ServicioException {
     	Page<CategoriaDTO> categoriasDTO = servicioCategorias.getCategoriasPaginado(paginacion)
     			.map(CategoriaDTO::fromEntity);
-        return ResponseEntity.ok(categoriasDTO);
+        return pagedResourcesAssembler.toModel(categoriasDTO);
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +50,9 @@ public class ProductoRestController {
     
     @Autowired
     private PagedResourcesAssembler<ProductoDTO> pagedResourcesAssembler;
+    
+    @Autowired
+    private PagedResourcesAssembler<ResumenProducto> pagedResourcesAssemblerRP; // TODO quitar este apaño para devolver ProductoDTO (quitar dto antiguo)
 
     @Autowired
     public ProductoRestController(ServicioProductos servicioProductos) {
@@ -105,7 +110,7 @@ public class ProductoRestController {
 
     /** GET /productos/buscar — Buscar productos con filtros opcionales */
     @GetMapping("/buscar")
-    public ResponseEntity<Page<ProductoDTO>> buscarProductos(
+    public PagedModel<EntityModel<ProductoDTO>> buscarProductos(
     		@RequestParam(required = false) String categoriaId,
     		@RequestParam(required = false) String texto,
     		@RequestParam(required = false) EstadoProducto estadoMinimo,
@@ -117,12 +122,12 @@ public class ProductoRestController {
         
         Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
         
-        return ResponseEntity.ok(productosDtos);
+        return pagedResourcesAssembler.toModel(productosDtos);
     }
 
     /** GET /productos/vendedor/{vendedorId} — Obtener productos de un vendedor */
     @GetMapping("/vendedor/{vendedorId}")
-    public ResponseEntity<Page<ProductoDTO>> getProductosPorVendedor(
+    public PagedModel<EntityModel<ProductoDTO>> getProductosPorVendedor(
     		@PathVariable String vendedorId,
     		@ParameterObject Pageable paginacion) 
     				throws ServicioException {
@@ -130,30 +135,30 @@ public class ProductoRestController {
         
         Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
         
-        return ResponseEntity.ok(productosDtos);
+        return pagedResourcesAssembler.toModel(productosDtos);
     }
 
     /** GET /productos/historial?mes=X&anio=Y — Resumen mensual de productos */
     @GetMapping("/historial")
-    public ResponseEntity<Page<ResumenProducto>> historialMes(
+    public PagedModel<EntityModel<ResumenProducto>> historialMes(
     		@RequestParam int mes,
     		@RequestParam int anio,
     		@ParameterObject Pageable paginacion) 
     				throws ServicioException {
         Page<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio, paginacion);
-        return ResponseEntity.ok(resumen);
+        return pagedResourcesAssemblerRP.toModel(resumen);
     }
 
     /** GET /productos/historial/{email}?mes=X&anio=Y — Resumen mensual de un vendedor */
     @GetMapping("/historial/{email}")
-    public ResponseEntity<Page<ResumenProducto>> historialMesVendedor(
+    public PagedModel<EntityModel<ResumenProducto>> historialMesVendedor(
             @PathVariable("email") String emailVendedor,
             @RequestParam int mes,
             @RequestParam int anio,
             @ParameterObject Pageable paginacion) 
             		throws ServicioException {
         Page<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor, paginacion);
-        return ResponseEntity.ok(resumen);
+        return pagedResourcesAssemblerRP.toModel(resumen);
     }
 
     /** DELETE /productos/{id} — Eliminar un producto */
