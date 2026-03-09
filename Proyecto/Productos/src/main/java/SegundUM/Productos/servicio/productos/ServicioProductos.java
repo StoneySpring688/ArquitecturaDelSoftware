@@ -49,33 +49,37 @@ public interface ServicioProductos {
     /**
      * Historial del mes de un vendedor: devuelve resumen ordenado por visualizaciones (desc).
      */
+    @Deprecated
     List<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor) throws ServicioException;
+    Page<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor, Pageable pageable) throws ServicioException;
     
     /**
      * Historial del mes de: devuelve resumen ordenado por visualizaciones (desc).
      */
+    @Deprecated
     List<ResumenProducto> historialMes(int mes, int anio) throws ServicioException;
+    Page<ResumenProducto> historialMes(int mes, int anio, Pageable pageable) throws ServicioException;
 
     /**
      * Buscar productos con los criterios opcionales.
      */
     @Deprecated
     List<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo) throws ServicioException;
-    
     Page<Producto> buscarProductos(String categoriaId, String texto, EstadoProducto estadoMinimo, BigDecimal precioMaximo, Pageable pageable) throws ServicioException;
     
     /**
      * Recupera los productos publicados por un vendedor específico.
      */
     List<Producto> getProductosPorVendedor(String vendedorId) throws ServicioException;
+    Page<Producto> getProductosPorVendedor(String vendedorId, Pageable pageable) throws ServicioException;
 
-    /* 
-        Método para obtener un producto por su id
-    */
+    /** 
+     * Método para obtener un producto por su id
+     */
     Producto getProductoPorId(String productoId) throws ServicioException, EntidadNoEncontrada;
 
-    /*
-        Método para eliminar un producto por su id
+    /**
+     * Método para eliminar un producto por su id
      */
     void eliminarProducto(String productoId) throws ServicioException, EntidadNoEncontrada;
     

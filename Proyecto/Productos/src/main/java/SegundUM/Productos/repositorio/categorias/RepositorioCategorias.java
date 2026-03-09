@@ -22,16 +22,17 @@ public interface RepositorioCategorias extends PagingAndSortingRepository<Catego
      */
 	@Deprecated
     List<Categoria> getCategoriasRaiz();
-	
 	Page<Categoria> getCategoriasRaiz(Pageable pageable);
+	
+	/**
+	 * Busca categorías por nombre (búsqueda insensible a mayúsculas).
+	 */
+    List<Categoria> findByNombreContainingIgnoreCase(String nombre);
 
     /**
      * Recupera todos los descendientes de una categoría.
      */
     List<Categoria> getDescendientes(String categoriaId);
 
-    /**
-	 * Busca categorías por nombre (búsqueda insensible a mayúsculas).
-	 */
-    List<Categoria> findByNombreContainingIgnoreCase(String nombre);
+    
 }

@@ -17,6 +17,9 @@ import SegundUM.Productos.dominio.Categoria;
 @Repository
 public interface RepositorioCategoriasJPA extends RepositorioCategorias, JpaRepository<Categoria, String>, RepositorioCategoriasCustom {
 
+	/**
+     * Recupera todas las categorías raíz (sin padre).
+     */
 	@Deprecated
     @Override
     @Query("SELECT c FROM Categoria c WHERE c.categoriaPadre IS NULL")
@@ -26,6 +29,9 @@ public interface RepositorioCategoriasJPA extends RepositorioCategorias, JpaRepo
     @Query("SELECT c FROM Categoria c WHERE c.categoriaPadre IS NULL")
     Page<Categoria> getCategoriasRaiz(Pageable pageable);
 
+    /**
+	 * Busca categorías por nombre (búsqueda insensible a mayúsculas).
+	 */
     @Override
     List<Categoria> findByNombreContainingIgnoreCase(String nombre);
 }

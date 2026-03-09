@@ -2,8 +2,6 @@ package SegundUM.Productos.rest.controllers;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -124,34 +122,37 @@ public class ProductoRestController {
 
     /** GET /productos/vendedor/{vendedorId} — Obtener productos de un vendedor */
     @GetMapping("/vendedor/{vendedorId}")
-    public ResponseEntity<List<ProductoDTO>> getProductosPorVendedor(@PathVariable String vendedorId) throws ServicioException {
-        List<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId);
+    public ResponseEntity<Page<ProductoDTO>> getProductosPorVendedor(
+    		@PathVariable String vendedorId,
+    		@ParameterObject Pageable paginacion) 
+    				throws ServicioException {
+        Page<Producto> productos = servicioProductos.getProductosPorVendedor(vendedorId, paginacion);
         
-        List<ProductoDTO> productosDtos = productos.stream()
-				.map(ProductoDTO::fromEntity)
-				.collect(Collectors.toList());
+        Page<ProductoDTO> productosDtos = productos.map(ProductoDTO::fromEntity);
         
         return ResponseEntity.ok(productosDtos);
     }
 
     /** GET /productos/historial?mes=X&anio=Y — Resumen mensual de productos */
     @GetMapping("/historial")
-    public ResponseEntity<List<ResumenProducto>> historialMes(
+    public ResponseEntity<Page<ResumenProducto>> historialMes(
     		@RequestParam int mes,
-    		@RequestParam int anio) 
+    		@RequestParam int anio,
+    		@ParameterObject Pageable paginacion) 
     				throws ServicioException {
-        List<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio);
+        Page<ResumenProducto> resumen = servicioProductos.historialMes(mes, anio, paginacion);
         return ResponseEntity.ok(resumen);
     }
 
     /** GET /productos/historial/{email}?mes=X&anio=Y — Resumen mensual de un vendedor */
     @GetMapping("/historial/{email}")
-    public ResponseEntity<List<ResumenProducto>> historialMesVendedor(
+    public ResponseEntity<Page<ResumenProducto>> historialMesVendedor(
             @PathVariable("email") String emailVendedor,
             @RequestParam int mes,
-            @RequestParam int anio) 
+            @RequestParam int anio,
+            @ParameterObject Pageable paginacion) 
             		throws ServicioException {
-        List<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor);
+        Page<ResumenProducto> resumen = servicioProductos.historialMesVendedor(mes, anio, emailVendedor, paginacion);
         return ResponseEntity.ok(resumen);
     }
 
