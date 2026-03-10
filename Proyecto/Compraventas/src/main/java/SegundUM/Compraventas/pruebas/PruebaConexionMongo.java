@@ -2,14 +2,14 @@ package SegundUM.Compraventas.pruebas;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import SegundUM.Compraventas.dominio.Compraventa;
-import SegundUM.Compraventas.puertos.PuertoUsuarios;
 import SegundUM.Compraventas.repositorio.compraventa.RepositorioCompraventaMongo;
+import SegundUM.Compraventas.rest.App;
 import SegundUM.Compraventas.servicio.compraventa.ServicioCompraventa;
 
-@Component
 public class PruebaConexionMongo implements CommandLineRunner {
 
     private final ServicioCompraventa servicioCompraventa;
@@ -22,8 +22,12 @@ public class PruebaConexionMongo implements CommandLineRunner {
         this.repositorio = repositorio;
     }
 
-    @Override
     public void run(String... args) throws Exception {
+    	
+    	// iniciar contexto del main de SpringBoot
+    	ConfigurableApplicationContext contexto =
+    			SpringApplication.run(App.class, args);
+    	
         System.out.println("=======================================================");
         System.out.println("⏳ Iniciando prueba de SERVICIO DE COMPRAVENTA...");
         System.out.println("=======================================================");
@@ -60,5 +64,7 @@ public class PruebaConexionMongo implements CommandLineRunner {
         }
         
         System.out.println("=======================================================");
+        
+        contexto.close();
     }
 }

@@ -48,12 +48,25 @@
 			<artifactId>mongodb-driver-sync</artifactId>
 		</dependency>
 		
+		<!-- SpringBoot REST API -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		<!-- Springdoc-openapi (Swagger UI de la api) -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+
 		<!-- Springboot HTTP Client-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-restclient</artifactId>
 		</dependency>
-		
+
 		<!-- Retrofit -->
 		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
@@ -65,25 +78,17 @@
 			<artifactId>converter-gson</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		
+
 		<!-- Springboot validations -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-		
+
 		<!-- Springboot HATEOAS-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-hateoas</artifactId>
-		</dependency>
-
-		<!-- Springdoc-openapi (Swagger UI de la api) -->
-		
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.5.12</version>
 		</dependency>
 
 	</dependencies>
