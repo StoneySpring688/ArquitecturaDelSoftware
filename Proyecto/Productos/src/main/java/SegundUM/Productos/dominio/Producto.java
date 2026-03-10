@@ -164,4 +164,21 @@ public class Producto implements Identificable {
     public void setVendedorId(String vendedorId) {
         this.vendedorId = vendedorId;
     }
+    
+    @Override
+    public String toString() {
+    			return "Producto{" +
+				"id='" + id + '\'' +
+				", titulo='" + titulo + '\'' +
+				", descripcion='" + descripcion + '\'' +
+				", precio=" + precio +
+				", estado=" + estado +
+				", fechaPublicacion=" + fechaPublicacion +
+				", categoria=" + (categoria != null ? categoria.getNombre() : "null") +
+				", visualizaciones=" + visualizaciones +
+				", envioDisponible=" + envioDisponible +
+				", recogida=" + (recogida != null ? recogida.getDescripcion() : "null") +
+				", vendedorId='" + vendedorId + '\'' +
+				'}';
+    }
 }

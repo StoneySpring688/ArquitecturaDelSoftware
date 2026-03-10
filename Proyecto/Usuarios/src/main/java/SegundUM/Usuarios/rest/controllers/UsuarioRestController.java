@@ -14,8 +14,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import io.jsonwebtoken.Claims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.jsonwebtoken.Claims;
 import SegundUM.Usuarios.dominio.ResumenUsuario;
 import SegundUM.Usuarios.dominio.Usuario;
 import SegundUM.Usuarios.repositorio.EntidadNoEncontrada;
@@ -35,6 +37,8 @@ import SegundUM.Usuarios.servicio.usuarios.ServicioUsuarios;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UsuarioRestController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(UsuarioRestController.class);
 
     @Context
     private UriInfo uriInfo;
@@ -49,6 +53,7 @@ public class UsuarioRestController {
     @Path("/")
     @RolesAllowed("USUARIO")
     public Response getAllusuarios() throws ServicioException {
+    	logger.info("Petición recibida: GET /usuarios (Obtener todos los usuarios)");
 
         List<ResumenUsuario> usuarios = servicioUsuarios.getAllUsuarios().stream()
                 .map(u -> new ResumenUsuario(u.getId(), u.getEmail(), u.getNombre(),
@@ -56,9 +61,11 @@ public class UsuarioRestController {
                 .collect(Collectors.toList());
 
         if (usuarios.isEmpty()) {
+        	logger.info("No se encontraron usuarios registrados en la base de datos.");
             return Response.noContent().build();
         }
 
+        logger.info("Retornando lista con {} usuarios.", usuarios.size());
         return Response.ok(usuarios).build();
     }
 
@@ -67,11 +74,26 @@ public class UsuarioRestController {
     @Path("/{id}")
     @RolesAllowed("USUARIO")
     public Response getUsuario(@PathParam("id") String id) throws ServicioException, EntidadNoEncontrada {
-        Usuario usuario = servicioUsuarios.getUserById(id);
-        ResumenUsuario resumen = new ResumenUsuario(usuario.getId(), usuario.getEmail(),
-                usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(),
-                usuario.getTelefono(), usuario.isAdministrador());
-        return Response.ok(resumen).build();
+    	logger.info("Petición recibida: GET /usuarios/{}", id);
+
+    	try {
+    		Usuario usuario = servicioUsuarios.getUserById(id);
+    		logger.debug("Datos del usuario recuperado: {}", usuario.toString());
+
+    		ResumenUsuario resumen = new ResumenUsuario(usuario.getId(), usuario.getEmail(),
+    				usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(),
+    				usuario.getTelefono(), usuario.isAdministrador());
+
+    		logger.info("Usuario {} recuperado con éxito.", id);
+    		return Response.ok(resumen).build();
+
+    	} catch (EntidadNoEncontrada e) {
+    		logger.warn("Usuario con ID {} no encontrado en la base de datos.", id);
+    		return Response.status(Response.Status.NOT_FOUND).build();
+    	} catch (ServicioException e) {
+    		logger.error("Error del servicio al recuperar el usuario {}: {}", id, e.getMessage());
+    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    	}
     }
 
     /** POST /usuarios — Alta de usuario (pública) */

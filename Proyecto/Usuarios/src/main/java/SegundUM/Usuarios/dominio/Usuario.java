@@ -130,4 +130,18 @@ public class Usuario implements Identificable {
     public List<String> getProductosId() {
         return productos;
     }
+    
+    @Override
+    public String toString() {
+    			return "Usuario{" +
+				"id='" + id + '\'' +
+				", email='" + email + '\'' +
+				", nombre='" + nombre + '\'' +
+				", apellidos='" + apellidos + '\'' +
+				", fechaNacimiento=" + fechaNacimiento +
+				", telefono='" + telefono + '\'' +
+				", administrador=" + administrador +
+				'}';
+    }
+    
 }

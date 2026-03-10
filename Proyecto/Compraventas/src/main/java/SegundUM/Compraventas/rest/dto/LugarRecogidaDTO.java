@@ -1,12 +1,10 @@
-package SegundUM.Productos.rest.dto;
+package SegundUM.Compraventas.rest.dto;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.*;
-
 import org.springframework.hateoas.RepresentationModel;
 
-import SegundUM.Productos.dominio.LugarRecogida;
+import jakarta.validation.constraints.*;
 
 public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> implements Serializable {
     private static final long serialVersionUID = 8886619346871580550L;
@@ -25,21 +23,25 @@ public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> impl
 
     public LugarRecogidaDTO() {}
 
-    public static LugarRecogidaDTO fromEntity(LugarRecogida entidad) {
-        if (entidad == null) return null;
-        LugarRecogidaDTO dto = new LugarRecogidaDTO();
-        dto.descripcion = entidad.getDescripcion();
-        dto.longitud = entidad.getLongitud();
-        dto.latitud = entidad.getLatitud();
-        return dto;
-    }
-    
-    @Override
-    public String toString() {
-    			return "LugarRecogidaDTO{" +
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public Double getLongitud() {
+		return longitud;
+	}
+
+	public Double getLatitud() {
+		return latitud;
+	}
+	
+	@Override
+	public String toString() {
+		return "LugarRecogidaDTO{" +
 				"descripcion='" + descripcion + '\'' +
 				", longitud=" + longitud +
 				", latitud=" + latitud +
 				'}';
-    			}
+	}
+    
 }

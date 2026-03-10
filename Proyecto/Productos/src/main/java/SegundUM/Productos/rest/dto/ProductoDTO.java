@@ -77,4 +77,22 @@ public class ProductoDTO extends RepresentationModel<ProductoDTO> implements Ser
 
         return dto;
     }
+    
+    @Override
+    public String toString() {
+    			return "ProductoDTO{" +
+				"id='" + id + '\'' +
+				", titulo='" + titulo + '\'' +
+				", descripcion='" + descripcion + '\'' +
+				", precio=" + precio +
+				", estado=" + estado +
+				", fechaPublicacion=" + fechaPublicacion +
+				", visualizaciones=" + visualizaciones +
+				", envioDisponible=" + envioDisponible +
+				", vendedorId='" + vendedorId + '\'' +
+				", categoriaId='" + categoriaId + '\'' +
+				", categoriaNombre='" + categoriaNombre + '\'' +
+				", recogida=" + recogida +
+				'}';
+    			}
 }
