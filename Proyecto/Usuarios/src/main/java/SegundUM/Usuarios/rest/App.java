@@ -40,11 +40,7 @@ public class App {
             logger.info("  PUT    {}usuarios/{{id}}    - Modificar datos del usuario", BASE_URI);
             logger.info("  DELETE {}usuarios/{{id}}    - Eliminar usuario", BASE_URI);
             logger.info("========================================");
-            logger.info("Pulsa ENTER para detener el servidor...");
-
-            System.in.read();
-            server.shutdownNow();
-            logger.info("=== Microservicio USUARIOS detenido ===");
+            
         } catch (Exception e) {
             logger.error("Error al arrancar el microservicio de Usuarios", e);
         }

@@ -16,7 +16,7 @@ public class ProgramaPruebaUsuarios {
         ControllerUsuarios controller = new ControllerUsuarios();
 
         // DATOS DE PRUEBA
-        String email = "laura.garcia@email.com";
+        String email = "lucy.garcia@email.com";
         String pass = "secreto123";
 
         // ---------------------------------------------------------------
@@ -24,7 +24,7 @@ public class ProgramaPruebaUsuarios {
         // ---------------------------------------------------------------
         logger.info("\n--- 1. Prueba de Registro ---");
         String idUsuario = controller.registrarUsuario(
-            email, "Laura", "García", pass, 
+            email, "Lucy", "García", pass, 
             LocalDate.of(1995, 5, 20), "666111222"
         );
 

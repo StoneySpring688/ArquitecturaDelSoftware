@@ -46,4 +46,13 @@ public class LugarRecogida {
     public void setLatitud(Double latitud) {
         this.latitud = latitud;
     }
+    
+    @Override
+    public String toString() {
+    			return "LugarRecogida{" +
+				"descripcion='" + descripcion + '\'' +
+				", longitud=" + longitud +
+				", latitud=" + latitud +
+				'}';
+    }
 }

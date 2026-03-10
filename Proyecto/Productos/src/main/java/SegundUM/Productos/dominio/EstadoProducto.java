@@ -21,4 +21,10 @@ public enum EstadoProducto {
     public boolean esMejorOIgualQue(EstadoProducto otro) {
         return this.nivel >= otro.nivel;
     }
+    
+    @Override
+    public String toString() {
+    			return this.name();
+		}
+    
 }

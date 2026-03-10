@@ -13,6 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -28,6 +31,8 @@ import SegundUM.Usuarios.servicio.usuarios.ServicioUsuarios;
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     public static final String SECRET_KEY = "clave_secreta_segund_um_2026";
     private ServicioUsuarios servicioUsuarios;
@@ -43,9 +48,13 @@ public class AuthController {
     public Response login(
             @FormParam("email") String email,
             @FormParam("clave") String clave) {
-
+    	
+    	logger.info("Recibida petición de login (JWT) para el email: {}", email);
+    	
         try {
             Usuario usuario = servicioUsuarios.login(email, clave);
+            
+            logger.debug("Login correcto en servicio para usuario ID: {}", usuario.getId());
 
             // Construir los claims del token
             Map<String, Object> claims = new HashMap<>();
@@ -63,12 +72,20 @@ public class AuthController {
                     .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                     .setExpiration(caducidad)
                     .compact();
+            
+            logger.info("Token JWT generado exitosamente para el usuario: {}", email);
 
             return Response.ok(token).build();
 
         } catch (ServicioException e) {
+        	logger.warn("Intento de login fallido para el email '{}'. Motivo: {}", email, e.getMessage());
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity("Credenciales inválidas").build();
+            
+        } catch (Exception e) {
+            logger.error("Error inesperado durante el proceso de login JWT: ", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error interno del servidor").build();
         }
     }
 }

@@ -5,6 +5,8 @@ import java.net.URI;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,6 +48,8 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
 @RequestMapping("/api/productos")
 public class ProductoRestController {
 	
+	private static final Logger logger = LoggerFactory.getLogger(ProductoRestController.class);
+	
     private final ServicioProductos servicioProductos;
     
     @Autowired
@@ -63,6 +67,7 @@ public class ProductoRestController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDTO> getProducto(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
         Producto p = servicioProductos.getProductoPorId(id);
+        logger.info("Producto obtenido: {}", ProductoDTO.fromEntity(p).toString());
         return ResponseEntity.ok(ProductoDTO.fromEntity(p));
     }
 
