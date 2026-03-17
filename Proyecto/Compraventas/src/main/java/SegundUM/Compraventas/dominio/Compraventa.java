@@ -75,6 +75,32 @@ public class Compraventa {
 	public LocalDateTime getFechaYHora() {
 		return fechaYHora;
 	}
-	
-	
+
+	public void setNombreVendedor(String nombreVendedor) {
+		this.nombreVendedor = nombreVendedor;
+	}
+
+	public void setNombreComprador(String nombreComprador) {
+		this.nombreComprador = nombreComprador;
+	}
+
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
+	}
+
+	public void setIdProducto(String idProducto) {
+		this.idProducto = idProducto;
+	}
+
+	public void setRecogida(String recogida) {
+		this.recogida = recogida;
+	}
+
+	public void setIdVendedor(String idVendedor) {
+		this.idVendedor = idVendedor;
+	}
+
+	public void setIdComprador(String idComprador) {
+		this.idComprador = idComprador;
+	}
 }

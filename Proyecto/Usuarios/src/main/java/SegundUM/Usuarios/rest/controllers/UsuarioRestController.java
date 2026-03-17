@@ -57,7 +57,8 @@ public class UsuarioRestController {
 
         List<ResumenUsuario> usuarios = servicioUsuarios.getAllUsuarios().stream()
                 .map(u -> new ResumenUsuario(u.getId(), u.getEmail(), u.getNombre(),
-                        u.getApellidos(), u.getFechaNacimiento(), u.getTelefono(), u.isAdministrador()))
+                        u.getApellidos(), u.getFechaNacimiento(), u.getTelefono(), u.isAdministrador(),
+                        u.getVentasRealizadas(), u.getComprasRealizadas()))
                 .collect(Collectors.toList());
 
         if (usuarios.isEmpty()) {
@@ -82,7 +83,8 @@ public class UsuarioRestController {
 
     		ResumenUsuario resumen = new ResumenUsuario(usuario.getId(), usuario.getEmail(),
     				usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(),
-    				usuario.getTelefono(), usuario.isAdministrador());
+    				usuario.getTelefono(), usuario.isAdministrador(),
+    				usuario.getVentasRealizadas(), usuario.getComprasRealizadas());
 
     		logger.info("Usuario {} recuperado con éxito.", id);
     		return Response.ok(resumen).build();
@@ -110,20 +112,6 @@ public class UsuarioRestController {
         String id = servicioUsuarios.altaUsuario(email, nombre, apellidos, clave, fecha, telefono);
         URI nuevaURI = uriInfo.getAbsolutePathBuilder().path(id).build();
         return Response.created(nuevaURI).entity(id).build();
-    }
-
-    /** POST /usuarios/login — Login (pública) */
-    @POST
-    @Path("/login")
-    @PermitAll
-    public Response login(
-            @QueryParam("email") String email,
-            @QueryParam("clave") String clave) throws ServicioException {
-        Usuario usuario = servicioUsuarios.login(email, clave);
-        ResumenUsuario resumen = new ResumenUsuario(usuario.getId(), usuario.getEmail(),
-                usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(),
-                usuario.getTelefono(), usuario.isAdministrador());
-        return Response.ok(resumen).build();
     }
 
     /** PUT /usuarios/{id} — Modificar usuario (autenticado, solo el propio usuario) */

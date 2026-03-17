@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,7 +74,7 @@ public class ProductoRestController {
 
     /** POST /productos — Dar de alta un producto */
     @PostMapping
-    public ResponseEntity<Void> altaProducto(@Valid @RequestBody ProductoDTO dto) 
+    public ResponseEntity<String> altaProducto(@Valid @RequestBody ProductoDTO dto) 
             		throws ServicioException {
         String id = servicioProductos.altaProducto(dto.titulo, dto.descripcion, dto.precio, dto.estado,
         		dto.categoriaId, dto.envioDisponible, dto.vendedorId);
@@ -82,7 +83,8 @@ public class ProductoRestController {
         		.path("/{id}")
         		.buildAndExpand(id)
         		.toUri();
-        return ResponseEntity.created(nuevaURI).build();
+        return ResponseEntity.created(nuevaURI).body(id);
+
     }
 
     /** PUT /productos/{id} — Modificar precio y/o descripción (con verificación de propietario) */

@@ -1,4 +1,3 @@
-
 package SegundUM.Usuarios.rest;
 
 import java.net.URI;
@@ -10,11 +9,22 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rabbitmq.client.ConnectionFactory;
+
+import SegundUM.Usuarios.adaptadores.RabbitMQ.AdaptadorSalidaEventosRabbitMQ;
+import SegundUM.Usuarios.adaptadores.RabbitMQ.ConsumidorEventosRabbitMQ;
+import SegundUM.Usuarios.adaptadores.RabbitMQ.RabbitMQConfigUsuarios;
+import SegundUM.Usuarios.puertos.PuertoEntradaEventos;
+import SegundUM.Usuarios.servicio.FactoriaServicios;
+import SegundUM.Usuarios.servicio.usuarios.ServicioUsuarios;
+import SegundUM.Usuarios.servicio.usuarios.ServicioUsuariosImpl;
+
 /**
  * Punto de entrada del microservicio REST de Usuarios.
  *
  * Arranca un servidor HTTP Grizzly con Jersey (JAX-RS) en el puerto 8081,
  * exponiendo el controlador REST de usuarios.
+ * Tambien arranca el consumidor de eventos RabbitMQ.
  */
 public class App {
 
@@ -23,7 +33,6 @@ public class App {
 
     public static void main(String[] args) {
         try {
-            // Escanea el paquete raíz rest (incluye controllers y utils/ObjectMapperProvider)
             ResourceConfig config = new ResourceConfig()
                     .packages("SegundUM.Usuarios.rest")
                     .register(JacksonFeature.class);
@@ -40,7 +49,32 @@ public class App {
             logger.info("  PUT    {}usuarios/{{id}}    - Modificar datos del usuario", BASE_URI);
             logger.info("  DELETE {}usuarios/{{id}}    - Eliminar usuario", BASE_URI);
             logger.info("========================================");
-            
+
+            // --- Configurar bus de eventos RabbitMQ ---
+
+            // ConnectionFactory compartida (creada por RabbitMQConfigUsuarios)
+            ConnectionFactory connectionFactory = RabbitMQConfigUsuarios.crearConnectionFactory();
+
+            // Obtener la instancia del servicio (singleton via FactoriaServicios)
+            ServicioUsuariosImpl servicio = (ServicioUsuariosImpl) FactoriaServicios.getServicio(ServicioUsuarios.class);
+
+            // Crear e inyectar el adaptador de salida (publisher)
+            AdaptadorSalidaEventosRabbitMQ adaptadorSalida = new AdaptadorSalidaEventosRabbitMQ(connectionFactory);
+            servicio.setPuertoSalidaEventos(adaptadorSalida);
+
+            // Crear y arrancar el consumidor de eventos (entrada)
+            ConsumidorEventosRabbitMQ consumidor = new ConsumidorEventosRabbitMQ(
+                    connectionFactory, (PuertoEntradaEventos) servicio);
+            consumidor.iniciar();
+
+            logger.info("Bus de eventos RabbitMQ configurado correctamente");
+
+            // Registrar shutdown hook para cerrar recursos
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Cerrando microservicio Usuarios...");
+                server.shutdownNow();
+            }));
+
         } catch (Exception e) {
             logger.error("Error al arrancar el microservicio de Usuarios", e);
         }

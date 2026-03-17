@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import SegundUM.Compraventas.dominio.Compraventa;
 import SegundUM.Compraventas.rest.dto.CompraventaDTO;
 import SegundUM.Compraventas.rest.dto.NuevaCompraventaDTO;
+import SegundUM.Compraventas.servicio.ServicioException;
 import SegundUM.Compraventas.servicio.compraventa.ServicioCompraventa;
 
 @RestController
@@ -48,12 +49,14 @@ public class CompraventaRestController {
         
         logger.info("Petición REST para realizar compra. Producto: {}, Comprador: {}", dto.getIdProducto(), dto.getIdComprador());
         
-        Compraventa guardada = servicioCompraventa.realizarCompra(
-                dto.getIdProducto(), 
-                dto.getIdComprador(), 
-                dto.getEmailComprador(), 
-                dto.getClaveComprador()
-        );
+        Compraventa guardada;
+        try {
+            guardada = servicioCompraventa.realizarCompra(
+                    dto.getIdProducto(), 
+                    dto.getIdComprador(), 
+                    dto.getEmailComprador(), 
+                    dto.getClaveComprador()
+            );
 
         // Generamos la URI hacia el recurso creado
         URI nuevaURI = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -62,6 +65,14 @@ public class CompraventaRestController {
                 .toUri();
                 
         return ResponseEntity.created(nuevaURI).build();
+
+        } catch (ServicioException e) {
+            logger.error("Error al realizar compra: ", e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+       
+        
     }
 
     @GetMapping("/comprador/{idComprador}")

@@ -110,6 +110,20 @@
 		 	<version>0.9.1</version>    
 		 </dependency>
 
+		<!-- RabbitMQ (cliente directo, sin Spring) -->
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>5.20.0</version>
+		</dependency>
+
+		<!-- Gson para serializar/deserializar JSON de eventos -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+
 
 	</dependencies>
 </project>

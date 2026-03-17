@@ -77,6 +77,12 @@
 			<artifactId>spring-boot-starter-hateoas</artifactId>
 		</dependency>
 
+		<!-- RabbitMQ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
 		<!-- Springdoc-openapi (Swagger UI de la api) -->
 		
 		<dependency>

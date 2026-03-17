@@ -50,6 +50,8 @@ public class Producto implements Identificable {
     
     @Column(name = "vendedor_id", nullable = false)
     private String vendedorId;
+
+    private boolean vendido;
     
     // Constructor por defecto para JPA
     protected Producto() {}
@@ -67,6 +69,7 @@ public class Producto implements Identificable {
         this.vendedorId = vendedorId;
         this.fechaPublicacion = LocalDateTime.now();
         this.visualizaciones = 0;
+        this.vendido = false;
     }
     
     // Método para incrementar visualizaciones
@@ -163,6 +166,14 @@ public class Producto implements Identificable {
     
     public void setVendedorId(String vendedorId) {
         this.vendedorId = vendedorId;
+    }
+
+    public boolean isVendido() {
+        return vendido;
+    }
+
+    public void setVendido(boolean vendido) {
+        this.vendido = vendido;
     }
     
     @Override

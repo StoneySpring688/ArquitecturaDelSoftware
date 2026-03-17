@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jar tf:*)",
+      "Bash(jar xf:*)",
+      "Read(//tmp/sb4/META-INF/**)",
+      "Bash(mkdir -p /tmp/sb4)",
+      "Read(//tmp/**)",
+      "Read(//home/maria/.m2/repository/org/springframework/**)",
+      "Bash(grep \"\"\"uri\"\"\" META-INF/spring-configuration-metadata.json)"
+    ]
+  }
+}
