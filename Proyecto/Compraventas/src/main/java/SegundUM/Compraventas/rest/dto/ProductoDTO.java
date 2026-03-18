@@ -23,6 +23,8 @@ public class ProductoDTO extends RepresentationModel<ProductoDTO> {
 	@NotNull(message = "El lugar de recogida es obligatorio")
     private LugarRecogidaDTO recogida;
 
+	private boolean vendido;
+
 	public ProductoDTO() {}
 	
     public String getIdVendedor() { 
@@ -40,6 +42,14 @@ public class ProductoDTO extends RepresentationModel<ProductoDTO> {
     public LugarRecogidaDTO getRecogida() {
     	return recogida; 
     	}
+	
+	public boolean isVendido() {
+		return vendido;
+	}
+
+	public void setVendido(boolean vendido) {
+		this.vendido = vendido;
+	}
     
     @Override
     public String toString() {

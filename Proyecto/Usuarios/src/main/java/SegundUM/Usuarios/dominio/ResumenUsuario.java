@@ -11,9 +11,12 @@ public class ResumenUsuario {
     private LocalDate fechaNacimiento;
     private String telefono;
     private boolean administrador;
+    private int ventasRealizadas;
+    private int comprasRealizadas;
 
     public ResumenUsuario(String id, String email, String nombre, String apellidos,
-                          LocalDate fechaNacimiento, String telefono, boolean administrador) {
+                          LocalDate fechaNacimiento, String telefono, boolean administrador,
+                          int ventasRealizadas, int comprasRealizadas) {
         this.id = id;
         this.email = email;
         this.nombre = nombre;
@@ -21,6 +24,8 @@ public class ResumenUsuario {
         this.fechaNacimiento = fechaNacimiento;
         this.telefono = telefono;
         this.administrador = administrador;
+        this.ventasRealizadas = ventasRealizadas;
+        this.comprasRealizadas = comprasRealizadas;
     }
 
     public String getId() { return id; }
@@ -30,4 +35,6 @@ public class ResumenUsuario {
     public LocalDate getFechaNacimiento() { return fechaNacimiento; }
     public String getTelefono() { return telefono; }
     public boolean isAdministrador() { return administrador; }
+    public int getVentasRealizadas() { return ventasRealizadas; }
+    public int getComprasRealizadas() { return comprasRealizadas; }
 }

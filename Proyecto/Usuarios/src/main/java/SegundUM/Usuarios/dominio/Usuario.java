@@ -29,6 +29,10 @@ public class Usuario implements Identificable {
     
     @Column(name = "fecha_nacimiento", nullable = false)
     private LocalDate fechaNacimiento;
+
+    private int comprasRealizadas;
+    
+    private int ventasRealizadas;
     
     private String telefono;
     
@@ -58,6 +62,8 @@ public class Usuario implements Identificable {
         this.fechaNacimiento = fechaNacimiento;
         this.telefono = telefono;
         this.administrador = false;
+        this.comprasRealizadas = 0;
+        this.ventasRealizadas = 0;
     }
     
     // Getters y setters (implementa Identificable)
@@ -129,6 +135,22 @@ public class Usuario implements Identificable {
     
     public List<String> getProductosId() {
         return productos;
+    }
+
+    public void setComprasRealizadas(int comprasRealizadas) {
+        this.comprasRealizadas = comprasRealizadas;
+    }
+
+    public int getComprasRealizadas() {
+        return comprasRealizadas;
+    }
+
+    public void setVentasRealizadas(int ventasRealizadas) {
+        this.ventasRealizadas = ventasRealizadas;
+    }
+
+    public int getVentasRealizadas() {
+        return ventasRealizadas;
     }
     
     @Override

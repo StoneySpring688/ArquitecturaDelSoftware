@@ -49,8 +49,10 @@ public class ProductoDTO extends RepresentationModel<ProductoDTO> implements Ser
     public String categoriaId;
     public String categoriaNombre;
     
-    @NotNull(message = "El lugar de recogida es obligatorio")
+    //@NotNull(message = "El lugar de recogida es obligatorio") si es obligatorio no puedo crear un producto y luego asignarle lugar de recogida.
     public LugarRecogidaDTO recogida;
+
+    public boolean vendido;
 
     public ProductoDTO() {}
 
@@ -74,6 +76,7 @@ public class ProductoDTO extends RepresentationModel<ProductoDTO> implements Ser
         }
 
         dto.recogida = LugarRecogidaDTO.fromEntity(p.getRecogida());
+        dto.vendido = p.isVendido();
 
         return dto;
     }

@@ -26,7 +26,12 @@ public class AdaptadorAuthRetrofit implements PuertoAutenticacion {
                 throw new RuntimeException("Credenciales inválidas. HTTP " + respuesta.code());
             }
             
-            return respuesta.body().string();
+            String token = respuesta.body().string();
+            // El token llega como JSON string con comillas ("eyJ..."), hay que quitarlas
+            if (token.startsWith("\"") && token.endsWith("\"")) {
+                token = token.substring(1, token.length() - 1);
+            }
+            return token;
             
         } catch (Exception e) {
             throw new RuntimeException("Error en login a través de Retrofit: " + e.getMessage(), e);
