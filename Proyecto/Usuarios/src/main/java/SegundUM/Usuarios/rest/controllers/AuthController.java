@@ -27,8 +27,10 @@ import SegundUM.Usuarios.servicio.usuarios.ServicioUsuarios;
 /**
  * Controlador de autenticación.
  * Gestiona el registro y login de usuarios, emitiendo tokens JWT.
+ * @deprecated Deshabilitado según Tarea 8. La autenticación ahora la gestiona la pasarela.
  */
-@Path("/auth")
+@Deprecated
+// @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthController {
 	

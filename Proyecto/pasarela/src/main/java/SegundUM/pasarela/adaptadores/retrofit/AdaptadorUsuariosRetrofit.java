@@ -30,4 +30,17 @@ public class AdaptadorUsuariosRetrofit implements PuertoUsuarios {
         }
         return null;
     }
+
+    @Override
+    public UsuarioDTO verificarGitHub(String idGitHub) {
+        try {
+            Response<UsuarioDTO> response = restClient.verificarGitHub(idGitHub).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error al conectar con el microservicio Usuarios (GitHub) mediante Retrofit", e);
+        }
+        return null;
+    }
 }

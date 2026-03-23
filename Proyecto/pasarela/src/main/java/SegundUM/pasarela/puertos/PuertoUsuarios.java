@@ -7,4 +7,5 @@ import SegundUM.pasarela.rest.dto.UsuarioDTO;
  */
 public interface PuertoUsuarios {
     UsuarioDTO verificarCredenciales(String email, String clave);
+    UsuarioDTO verificarGitHub(String idGitHub);
 }

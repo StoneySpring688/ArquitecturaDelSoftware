@@ -11,4 +11,8 @@ public interface UsuariosRestClient {
     Call<UsuarioDTO> verificarCredenciales(
             @Query("email") String email,
             @Query("clave") String clave);
+
+    @GET("usuarios/verificar-github")
+    Call<UsuarioDTO> verificarGitHub(
+            @Query("idGitHub") String idGitHub);
 }
