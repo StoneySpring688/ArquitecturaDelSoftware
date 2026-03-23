@@ -149,4 +149,55 @@ public class UsuarioRestController {
         servicioUsuarios.deleteUserById(id);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
+
+    /** 
+     * GET /usuarios/verificar — Verificar credenciales de un usuario.
+     * Operación pública requerida para la pasarela de API.
+     */
+    @GET
+    @Path("/verificar")
+    @PermitAll
+    public Response verificarCredenciales(
+            @QueryParam("email") String email,
+            @QueryParam("clave") String clave) {
+        
+        logger.info("Solicitud de verificación de credenciales para el email: {}", email);
+        
+        try {
+            Usuario usuario = servicioUsuarios.login(email, clave);
+            logger.info("Credenciales válidas para el usuario: {}", email);
+            return Response.ok(usuario).build();
+        } catch (ServicioException e) {
+            logger.warn("Verificación de credenciales fallida para '{}': {}", email, e.getMessage());
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("Credenciales inválidas").build();
+        } catch (Exception e) {
+            logger.error("Error inesperado durante la verificación de credenciales: ", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /** 
+     * GET /usuarios/verificar-github — Obtener usuario por ID de GitHub.
+     * Operación pública requerida para la pasarela de API.
+     */
+    @GET
+    @Path("/verificar-github")
+    @PermitAll
+    public Response verificarGitHub(@QueryParam("idGitHub") String idGitHub) {
+        
+        logger.info("Solicitud de recuperación de usuario por GitHub ID: {}", idGitHub);
+        
+        try {
+            Usuario usuario = servicioUsuarios.getUsuarioPorIdGitHub(idGitHub);
+            logger.info("Usuario encontrado para GitHub ID: {}", idGitHub);
+            return Response.ok(usuario).build();
+        } catch (ServicioException | EntidadNoEncontrada e) {
+            logger.warn("No se encontró usuario para GitHub ID: {}", idGitHub);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (Exception e) {
+            logger.error("Error inesperado al buscar por GitHub ID: ", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
