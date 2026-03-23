@@ -14,6 +14,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -45,6 +46,7 @@ public class CompraventaRestController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Realizar una compra", description = "Registra una nueva compraventa verificando stock y usuarios")
+    @PreAuthorize("hasAuthority('USUARIO') and #dto.idComprador == authentication.principal")
     public ResponseEntity<Void> realizarCompra(@Valid @RequestBody NuevaCompraventaDTO dto) {
         
         logger.info("Petición REST para realizar compra. Producto: {}, Comprador: {}", dto.getIdProducto(), dto.getIdComprador());
@@ -77,6 +79,7 @@ public class CompraventaRestController {
 
     @GetMapping("/comprador/{idComprador}")
     @Operation(summary = "Historial de compras", description = "Devuelve paginadas todas las compras de un usuario")
+    @PreAuthorize("hasAuthority('USUARIO') and #idComprador == authentication.principal")
     public PagedModel<EntityModel<CompraventaDTO>> recuperarComprasDeUsuario(
             @PathVariable String idComprador,
             @ParameterObject Pageable paginacion) {
@@ -90,6 +93,7 @@ public class CompraventaRestController {
 
     @GetMapping("/vendedor/{idVendedor}")
     @Operation(summary = "Historial de ventas", description = "Devuelve paginadas todas las ventas de un usuario")
+    @PreAuthorize("hasAuthority('USUARIO') and #idVendedor == authentication.principal")
     public PagedModel<EntityModel<CompraventaDTO>> recuperarVentasDeUsuario(
             @PathVariable String idVendedor,
             @ParameterObject Pageable paginacion) {
@@ -102,6 +106,7 @@ public class CompraventaRestController {
 
     @GetMapping("/entre")
     @Operation(summary = "Historial entre dos usuarios", description = "Devuelve las operaciones exactas entre un comprador y un vendedor")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public PagedModel<EntityModel<CompraventaDTO>> recuperarCompraventasEntre(
             @RequestParam String idComprador,
             @RequestParam String idVendedor,

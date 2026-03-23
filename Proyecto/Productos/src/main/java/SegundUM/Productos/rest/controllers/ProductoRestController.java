@@ -16,6 +16,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,6 +76,7 @@ public class ProductoRestController {
 
     /** POST /productos — Dar de alta un producto */
     @PostMapping
+    @PreAuthorize("hasAuthority('USUARIO') and #dto.vendedorId == authentication.principal")
     public ResponseEntity<String> altaProducto(@Valid @RequestBody ProductoDTO dto) 
             		throws ServicioException {
         String id = servicioProductos.altaProducto(dto.titulo, dto.descripcion, dto.precio, dto.estado,
@@ -89,6 +92,7 @@ public class ProductoRestController {
 
     /** PUT /productos/{id} — Modificar precio y/o descripción (con verificación de propietario) */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('USUARIO') and #dto.vendedorId == authentication.principal")
     public ResponseEntity<Producto> modificarProducto(
     		@PathVariable("id") String productoId,
             @Valid @RequestBody ProductoUpdateDTO dto) throws ServicioException {
@@ -99,13 +103,28 @@ public class ProductoRestController {
 
     /** PUT /productos/{id}/recogida — Asociar lugar de recogida a un producto */
     @PutMapping("/{id}/recogida")
+    @PreAuthorize("hasAuthority('USUARIO')")
     public ResponseEntity<Void> asociarLugarRecogida(
             @PathVariable("id") String productoId,
            @Valid @RequestBody LugarRecogidaDTO dto) 
             		throws ServicioException {
     	
-        servicioProductos.asignarLugarRecogida(productoId, dto.descripcion, dto.longitud, dto.latitud);
-        return ResponseEntity.noContent().build();
+    	Producto producto;
+		try {
+			producto = servicioProductos.getProductoPorId(productoId);
+			
+			String usuarioLogueado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	        
+	        if (!producto.getVendedorId().equals(usuarioLogueado)) {
+	            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	        }
+	        servicioProductos.asignarLugarRecogida(productoId, dto.descripcion, dto.longitud, dto.latitud);
+	        return ResponseEntity.noContent().build();
+	        
+		} catch (ServicioException | EntidadNoEncontrada e) {
+			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+		
     }
 
     /** PUT /productos/{id}/visualizaciones — Registrar una nueva visualización */
