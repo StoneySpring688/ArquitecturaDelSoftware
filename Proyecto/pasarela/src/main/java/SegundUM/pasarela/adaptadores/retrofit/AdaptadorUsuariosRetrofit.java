@@ -1,0 +1,33 @@
+package SegundUM.pasarela.adaptadores.retrofit;
+
+import SegundUM.pasarela.puertos.PuertoUsuarios;
+import SegundUM.pasarela.rest.dto.UsuarioDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import retrofit2.Response;
+
+import java.io.IOException;
+
+@Component
+public class AdaptadorUsuariosRetrofit implements PuertoUsuarios {
+
+    private final UsuariosRestClient restClient;
+
+    @Autowired
+    public AdaptadorUsuariosRetrofit(UsuariosRestClient restClient) {
+        this.restClient = restClient;
+    }
+
+    @Override
+    public UsuarioDTO verificarCredenciales(String email, String clave) {
+        try {
+            Response<UsuarioDTO> response = restClient.verificarCredenciales(email, clave).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error al conectar con el microservicio Usuarios mediante Retrofit", e);
+        }
+        return null;
+    }
+}
