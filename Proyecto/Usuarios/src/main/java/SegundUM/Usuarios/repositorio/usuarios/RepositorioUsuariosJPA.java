@@ -64,5 +64,31 @@ public class RepositorioUsuariosJPA extends RepositorioJPA<Usuario> implements R
         } finally {
             EntityManagerHelper.closeEntityManager();
         }
-    }
-}
+        }
+
+        @Override
+        public Usuario getByIdGitHub(String idGitHub) throws RepositorioException, EntidadNoEncontrada {
+        EntityManager em = EntityManagerHelper.getEntityManager();
+        try {
+            TypedQuery<Usuario> query = em.createQuery(
+                "SELECT u FROM Usuario u WHERE u.idGitHub = :idGitHub", 
+                Usuario.class
+            );
+            query.setParameter("idGitHub", idGitHub);
+
+            List<Usuario> usuarios = query.getResultList();
+
+            if (usuarios.isEmpty()) {
+                throw new EntidadNoEncontrada("Usuario con idGitHub " + idGitHub + " no encontrado");
+            }
+
+            return usuarios.get(0);
+        } catch (EntidadNoEncontrada e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RepositorioException("Error al buscar usuario por idGitHub " + idGitHub, e);
+        } finally {
+            EntityManagerHelper.closeEntityManager();
+        }
+        }
+        }

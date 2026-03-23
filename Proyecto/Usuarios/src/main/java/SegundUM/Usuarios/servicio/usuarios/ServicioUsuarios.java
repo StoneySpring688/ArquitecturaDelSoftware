@@ -44,4 +44,9 @@ public interface ServicioUsuarios {
      * Elimina un usuario por su identificador.
      */
     void deleteUserById(String usuarioId) throws ServicioException, EntidadNoEncontrada;
+
+    /**
+     * Obtiene un usuario por su identificador de GitHub.
+     */
+    Usuario getUsuarioPorIdGitHub(String idGitHub) throws ServicioException, EntidadNoEncontrada;
 }

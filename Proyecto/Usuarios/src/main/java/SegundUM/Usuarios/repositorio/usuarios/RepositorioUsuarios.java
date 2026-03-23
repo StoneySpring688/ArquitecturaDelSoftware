@@ -19,4 +19,9 @@ public interface RepositorioUsuarios extends RepositorioString<Usuario> {
      * Verifica si existe un usuario con el email dado.
      */
     boolean existeEmail(String email) throws RepositorioException;
-}
+
+    /**
+     * Busca un usuario por su identificador de GitHub.
+     */
+    Usuario getByIdGitHub(String idGitHub) throws RepositorioException, EntidadNoEncontrada;
+    }
