@@ -38,7 +38,10 @@ public class Usuario implements Identificable {
     
     @Column(nullable = false)
     private boolean administrador;
-    
+
+    @Column(name = "id_github", unique = true)
+    private String idGitHub;
+
     /**
      * TODO
      * Este atributo hay que revisarlo, a ser posible en el laboratorio de prácticas,
@@ -151,6 +154,14 @@ public class Usuario implements Identificable {
 
     public int getVentasRealizadas() {
         return ventasRealizadas;
+    }
+
+    public String getIdGitHub() {
+        return idGitHub;
+    }
+
+    public void setIdGitHub(String idGitHub) {
+        this.idGitHub = idGitHub;
     }
     
     @Override

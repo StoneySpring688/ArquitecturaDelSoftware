@@ -139,6 +139,15 @@ public class ServicioUsuariosImpl implements ServicioUsuarios, PuertoEntradaEven
 		}
 	}
 
+	@Override
+	public Usuario getUsuarioPorIdGitHub(String idGitHub) throws ServicioException, EntidadNoEncontrada {
+		try {
+			return repositorioUsuarios.getByIdGitHub(idGitHub);
+		} catch (RepositorioException e) {
+			throw new ServicioException("Error al obtener el usuario por idGitHub: " + idGitHub, e);
+		}
+	}
+
 	// --- Implementacion PuertoEntradaEventos ---
 
 	@Override
