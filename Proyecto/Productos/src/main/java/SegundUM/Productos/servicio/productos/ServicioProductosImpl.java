@@ -159,9 +159,11 @@ public class ServicioProductosImpl implements ServicioProductos, PuertaEntradaEv
     public Page<ResumenProducto> historialMesVendedor(int mes, int anio, String emailVendedor, Pageable pageable) throws ServicioException {
 
     	String vendedorId = null;
-    	if (emailVendedor != null) {
+    	if (emailVendedor == null) {
     		logger.info("USANDO VALOR DE PRUEBAS PARA ID DEL VENDEDOR, SE DEBE REEMPLAZAR POR LA CONSULTA A LA API DE USUARIOS");
-            vendedorId = "ID-TEMPORAL-PARA-PRUEBAS";
+    		// TODO: vendedorId = clienteHttpUsuarios.obtenerIdPorEmail(emailVendedor);
+
+            vendedorId = "ID-TEMPORAL-PARA-PRUEBAS"; // TODO tempooral para pruebas sin la api
        }
     	return repositorioProductos.getHistorialMes(mes, anio, vendedorId, pageable).map(ResumenProducto::fromEntity);
     }

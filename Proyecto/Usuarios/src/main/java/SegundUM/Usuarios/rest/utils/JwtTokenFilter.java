@@ -18,20 +18,21 @@ import javax.ws.rs.ext.Provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-
-import SegundUM.Usuarios.rest.controllers.AuthController;
+import javax.ws.rs.core.Cookie;
 
 /**
  * Filtro JAX-RS para control de autenticación y autorización mediante JWT.
  *
  * - Comprueba si la ruta es pública (@PermitAll) y la deja pasar.
- * - Para rutas protegidas, valida el token JWT de la cabecera Authorization.
+ * - Para rutas protegidas, valida el token JWT de la cabecera Authorization o cookie 'jwt'.
  * - Si la ruta tiene @RolesAllowed, verifica que el usuario tenga el rol adecuado.
  * - Pone la información del token (claims) como propiedad de la petición.
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtTokenFilter implements ContainerRequestFilter {
+
+    private static final String SECRET_KEY = "secreto_compartido_segundum_2026";
 
     @Context
     private ResourceInfo resourceInfo;
@@ -45,18 +46,29 @@ public class JwtTokenFilter implements ContainerRequestFilter {
             return; // no se controla la autorización
         }
 
-        // Implementación del control de autorización
-        String authorization = requestContext.getHeaderString("Authorization");
+        String token = null;
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        // 1. Intentar obtener de la cabecera Authorization
+        String authorization = requestContext.getHeaderString("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            token = authorization.substring("Bearer ".length()).trim();
+        } 
+        // 2. Intentar obtener de la cookie 'jwt'
+        else {
+            Cookie cookie = requestContext.getCookies().get("jwt");
+            if (cookie != null) {
+                token = cookie.getValue();
+            }
+        }
+
+        if (token == null) {
             requestContext.abortWith(
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } else {
-            String token = authorization.substring("Bearer ".length()).trim();
             try {
                 // Validar el token
                 Claims claims = Jwts.parser()
-                        .setSigningKey(AuthController.SECRET_KEY)
+                        .setSigningKey(SECRET_KEY.getBytes())
                         .parseClaimsJws(token)
                         .getBody();
 
