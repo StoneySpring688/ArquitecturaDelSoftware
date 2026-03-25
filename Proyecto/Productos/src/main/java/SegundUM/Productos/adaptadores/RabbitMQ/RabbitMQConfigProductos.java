@@ -1,5 +1,7 @@
 package SegundUM.Productos.adaptadores.RabbitMQ;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMQConfigProductos {
+
+    private static final Logger logger = LoggerFactory.getLogger(RabbitMQConfigProductos.class);
 
     public static final String EXCHANGE_NAME = "bus";
     public static final String QUEUE_NAME = "productos";

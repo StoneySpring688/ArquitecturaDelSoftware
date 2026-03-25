@@ -20,6 +20,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import javax.ws.rs.core.Cookie;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Filtro JAX-RS para control de autenticación y autorización mediante JWT.
  *
@@ -31,6 +34,8 @@ import javax.ws.rs.core.Cookie;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtTokenFilter implements ContainerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
 
     private static final String SECRET_KEY = "secreto_compartido_segundum_2026";
 
@@ -62,6 +67,7 @@ public class JwtTokenFilter implements ContainerRequestFilter {
         }
 
         if (token == null) {
+            logger.warn("Peticion sin token JWT para ruta protegida: {}", requestContext.getUriInfo().getPath());
             requestContext.abortWith(
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } else {
@@ -94,7 +100,8 @@ public class JwtTokenFilter implements ContainerRequestFilter {
                     }
                 }
 
-            } catch (Exception e) { // Error de validación (token inválido o caducado)
+            } catch (Exception e) {
+                logger.warn("Token JWT invalido o caducado: {}", e.getMessage());
                 requestContext.abortWith(
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }

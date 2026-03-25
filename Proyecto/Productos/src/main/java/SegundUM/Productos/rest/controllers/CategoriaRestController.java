@@ -1,5 +1,7 @@
 package SegundUM.Productos.rest.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ import SegundUM.Productos.servicio.categorias.ServicioCategorias;
 @RequestMapping("/api/categorias")
 public class CategoriaRestController implements CategoriasApi {
 
+    private static final Logger logger = LoggerFactory.getLogger(CategoriaRestController.class);
+
     private final ServicioCategorias servicioCategorias;
     
     @Autowired
@@ -42,6 +46,7 @@ public class CategoriaRestController implements CategoriasApi {
     /** GET /categorias/{id} — Obtener una categoría por ID */
     @GetMapping("/{id}")
     public EntityModel<CategoriaDTO> getCategoria(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
+        logger.info("Peticion recibida: GET /categorias/{}", id);
         return EntityModel.of(CategoriaDTO.fromEntity(servicioCategorias.getCategoriaById(id)))
         		.add(
         				WebMvcLinkBuilder.linkTo(
@@ -65,6 +70,7 @@ public class CategoriaRestController implements CategoriasApi {
     }*/
     @Override
     public PagedModel<EntityModel<CategoriaDTO>> getCategoriasPaginado(Pageable paginacion) throws ServicioException {
+    	logger.info("Peticion recibida: GET /categorias (paginado)");
     	Page<CategoriaDTO> categoriasDTO = servicioCategorias.getCategoriasPaginado(paginacion)
     			.map(CategoriaDTO::fromEntity);
         return pagedResourcesAssembler.toModel(categoriasDTO);

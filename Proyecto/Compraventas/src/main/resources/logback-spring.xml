@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<!-- Nombre del microservicio (aparece en cada linea de log) -->
-	<property name="SERVICE_NAME" value="USUARIOS" />
+	<property name="SERVICE_NAME" value="COMPRAVENTAS" />
 	<property name="LOG_DIR" value="logs" />
 	<!-- Patron unificado para todos los microservicios -->
 	<property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-15.15thread] [${SERVICE_NAME}] %-5level %-40.40logger{40} - %msg%n" />
@@ -9,13 +9,14 @@
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>${LOG_PATTERN}</pattern>
+			<charset>utf8</charset>
 		</encoder>
 	</appender>
 
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/usuarios.log</file>
+		<file>${LOG_DIR}/compraventas.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/usuarios-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/compraventas-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<maxFileSize>150MB</maxFileSize>
 			<maxHistory>3</maxHistory>
 		</rollingPolicy>

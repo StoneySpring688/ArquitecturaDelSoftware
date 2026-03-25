@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
-	<!-- Directorio donde guarda los logs-->
+	<!-- Nombre del microservicio (aparece en cada linea de log) -->
+	<property name="SERVICE_NAME" value="PRODUCTOS" />
 	<property name="LOG_DIR" value="logs" />
-	<!-- Appender para consola -->
+	<!-- Patron unificado para todos los microservicios -->
+	<property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-15.15thread] [${SERVICE_NAME}] %-5level %-40.40logger{40} - %msg%n" />
+
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>utf8</charset>
 		</encoder>
 	</appender>
-	<!-- Appender para fichero simple -->
-	<appender name="FILE"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/app.log</file>
-		<rollingPolicy
-			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/productos.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/productos-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<maxFileSize>150MB</maxFileSize>
 			<maxHistory>3</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+			<pattern>${LOG_PATTERN}</pattern>
 		</encoder>
 	</appender>
 

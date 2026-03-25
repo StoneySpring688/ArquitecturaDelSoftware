@@ -5,6 +5,9 @@ import java.util.Map;
 
 import SegundUM.Usuarios.util.PropertiesReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * Factoría que encapsula la implementación de un servicio.
  * 
@@ -15,7 +18,9 @@ import SegundUM.Usuarios.util.PropertiesReader;
  */
 
 public class FactoriaServicios {
-	
+
+	private static final Logger logger = LoggerFactory.getLogger(FactoriaServicios.class);
+
 	private static final String PROPERTIES = "servicios.properties";
 	
 	private static Map<Class<?>, Object> servicios = new HashMap<>();
@@ -40,7 +45,7 @@ public class FactoriaServicios {
 			}
 			catch (Exception e) {
 				
-				e.printStackTrace(); // útil para depuración
+				logger.error("Error al instanciar el servicio: " + servicio.getName(), e);
 				
 				throw new RuntimeException("No se ha podido obtener la implementación del servicio: " + servicio.getName());
 			}

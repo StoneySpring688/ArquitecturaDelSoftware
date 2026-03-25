@@ -61,8 +61,6 @@ public class ServicioCompraventaImpl implements ServicioCompraventa, PuertoEntra
 
         UsuarioDTO comprador = puertoUsuarios.obtenerDatosUsuario(idComprador, token);
 
-        System.out.println(comprador);
-
         logger.info("Comprador Obtenido = {}", comprador.toString());
 
         UsuarioDTO vendedor = puertoUsuarios.obtenerDatosUsuario(producto.getIdVendedor(), token);

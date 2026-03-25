@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * */
 public abstract class RepositorioXML<T extends Identificable> implements RepositorioString<T> {
 	
-	Logger logger = LoggerFactory.getILoggerFactory().getLogger(RepositorioXML.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(RepositorioXML.class);
 
 	public final static String DIRECTORIO = "categoriasXML/";
 

@@ -11,12 +11,17 @@ import SegundUM.Usuarios.repositorio.RepositorioException;
 import SegundUM.Usuarios.repositorio.RepositorioJPA;
 import SegundUM.Usuarios.util.EntityManagerHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Implementación JPA del repositorio de usuarios.
  */
 public class RepositorioUsuariosJPA extends RepositorioJPA<Usuario> implements RepositorioUsuarios {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(RepositorioUsuariosJPA.class);
+
     @Override
     public Class<Usuario> getClase() {
         return Usuario.class;
@@ -24,6 +29,7 @@ public class RepositorioUsuariosJPA extends RepositorioJPA<Usuario> implements R
     
     @Override
     public Usuario getByEmail(String email) throws RepositorioException, EntidadNoEncontrada {
+        logger.debug("Buscando usuario por email: {}", email);
         EntityManager em = EntityManagerHelper.getEntityManager();
         try {
             TypedQuery<Usuario> query = em.createQuery(
@@ -50,6 +56,7 @@ public class RepositorioUsuariosJPA extends RepositorioJPA<Usuario> implements R
     
     @Override
     public boolean existeEmail(String email) throws RepositorioException {
+        logger.debug("Verificando existencia de email: {}", email);
         EntityManager em = EntityManagerHelper.getEntityManager();
         try {
             TypedQuery<Long> query = em.createQuery(
@@ -68,6 +75,7 @@ public class RepositorioUsuariosJPA extends RepositorioJPA<Usuario> implements R
 
         @Override
         public Usuario getByIdGitHub(String idGitHub) throws RepositorioException, EntidadNoEncontrada {
+        logger.debug("Buscando usuario por GitHub ID: {}", idGitHub);
         EntityManager em = EntityManagerHelper.getEntityManager();
         try {
             TypedQuery<Usuario> query = em.createQuery(

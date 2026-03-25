@@ -5,6 +5,9 @@ import java.io.IOException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Configuracion de RabbitMQ para el microservicio de Usuarios.
  *
@@ -21,6 +24,8 @@ import com.rabbitmq.client.ConnectionFactory;
  * pero implementada en Java puro al no usar Spring en este microservicio.
  */
 public class RabbitMQConfigUsuarios {
+
+    private static final Logger logger = LoggerFactory.getLogger(RabbitMQConfigUsuarios.class);
 
     public static final String EXCHANGE_NAME = "bus";
     public static final String QUEUE_NAME = "usuarios";
@@ -49,6 +54,7 @@ public class RabbitMQConfigUsuarios {
         factory.setUsername(USERNAME);
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
+        logger.info("Creando ConnectionFactory RabbitMQ para Usuarios (host: {})", HOST);
         try {
             factory.useSslProtocol();
         } catch (Exception e) {
@@ -65,5 +71,6 @@ public class RabbitMQConfigUsuarios {
         for (String pattern : BINDINGS) {
             channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, pattern);
         }
+        logger.info("Bindings configurados para la cola de Usuarios: {} suscripciones", BINDINGS.length);
     }
 }
