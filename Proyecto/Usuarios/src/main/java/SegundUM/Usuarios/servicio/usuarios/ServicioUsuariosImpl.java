@@ -148,6 +148,32 @@ public class ServicioUsuariosImpl implements ServicioUsuarios, PuertoEntradaEven
 		}
 	}
 
+	@Override
+	public String altaUsuarioGitHub(String idGitHub, String nombre, String email) throws ServicioException {
+		try {
+			String finalEmail = (email != null) ? email : idGitHub + "@github.com";
+			
+			if (repositorioUsuarios.existeEmail(finalEmail)) {
+				try {
+					Usuario existente = repositorioUsuarios.getByIdGitHub(idGitHub);
+					return existente.getId();
+				} catch (EntidadNoEncontrada | RepositorioException e) {
+					throw new ServicioException("El email " + finalEmail + " ya esta registrado por otro usuario");
+				}
+			}
+
+			String id = java.util.UUID.randomUUID().toString();
+			Usuario u = new Usuario(id, finalEmail, nombre, null, null, null, null);
+			u.setIdGitHub(idGitHub);
+
+			logger.debug("Dando de alta nuevo usuario desde GitHub: " + u.toString());
+			return repositorioUsuarios.add(u);
+		} catch (RepositorioException e) {
+			logger.error("Error al dar de alta el usuario GitHub: " + idGitHub, e);
+			throw new ServicioException("Error al dar de alta el usuario GitHub", e);
+		}
+	}
+
 	// --- Implementacion PuertoEntradaEventos ---
 
 	@Override

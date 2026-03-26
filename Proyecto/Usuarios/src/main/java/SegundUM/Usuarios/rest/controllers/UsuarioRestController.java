@@ -70,6 +70,25 @@ public class UsuarioRestController {
         return Response.ok(usuarios).build();
     }
 
+    /** 
+     * POST /usuarios/github — Alta de usuario desde GitHub.
+     * @throws EntidadNoEncontrada 
+     */
+    @POST
+    @Path("/github")
+    @PermitAll
+    public Response registrarUsuarioGitHub(
+            @QueryParam("idGitHub") String idGitHub,
+            @QueryParam("nombre") String nombre,
+            @QueryParam("email") String email) throws ServicioException, EntidadNoEncontrada {
+        
+        logger.info("Solicitud de registro de usuario vía GitHub: {}", idGitHub);
+        String id = servicioUsuarios.altaUsuarioGitHub(idGitHub, nombre, email);
+        Usuario usuario = servicioUsuarios.getUserById(id);
+        URI nuevaURI = uriInfo.getAbsolutePathBuilder().path(id).build();
+        return Response.created(nuevaURI).entity(usuario).build();
+    }
+
     /** GET /usuarios/{id} — Recuperación de usuario (usuario autenticado) */
     @GET
     @Path("/{id}")

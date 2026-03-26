@@ -3,7 +3,10 @@ package SegundUM.pasarela.rest.dto;
 import java.io.Serializable;
 
 public class UsuarioDTO implements Serializable {
-    private String id;
+
+	private static final long serialVersionUID = -8267470864062483064L;
+	
+	private String id;
     private String email;
     private String nombre;
     private String apellidos;
@@ -27,6 +30,7 @@ public class UsuarioDTO implements Serializable {
     public void setAdministrador(boolean administrador) { this.administrador = administrador; }
 
     public String getNombreCompleto() {
-        return nombre + " " + apellidos;
+    	// si viene de oauth2 con github los apellidos estarán a null
+        return (apellidos != null) ? nombre + " " + apellidos  : nombre;
     }
 }

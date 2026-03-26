@@ -43,4 +43,17 @@ public class AdaptadorUsuariosRetrofit implements PuertoUsuarios {
         }
         return null;
     }
+
+    @Override
+    public UsuarioDTO registrarUsuarioGitHub(String idGitHub, String nombre, String email) {
+        try {
+            Response<UsuarioDTO> response = restClient.registrarUsuarioGitHub(idGitHub, nombre, email).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error al registrar usuario GitHub mediante Retrofit", e);
+        }
+        return null;
+    }
 }
