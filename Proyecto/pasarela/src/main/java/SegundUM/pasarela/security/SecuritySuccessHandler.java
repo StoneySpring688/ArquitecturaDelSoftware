@@ -71,7 +71,22 @@ public class SecuritySuccessHandler implements AuthenticationSuccessHandler {
             response.getWriter().write(objectMapper.writeValueAsString(body));
         } else {
             // Si el usuario de GitHub no está registrado en SegundUM
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Usuario de GitHub no vinculado a SegundUM");
+            // TODO TEMP : response.sendError(HttpServletResponse.SC_FORBIDDEN, "Usuario de GitHub no vinculado a SegundUM");
+        	DefaultOAuth2User oauthUserOnError = (DefaultOAuth2User) authentication.getPrincipal();
+            Map<String, Object> atributos = oauthUserOnError.getAttributes();
+
+            // 2. Preparamos la respuesta para mostrar texto claro en el navegador
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+
+            // 3. Creamos un mensaje de ayuda que incluya los atributos
+            Map<String, Object> errorDebug = new HashMap<>();
+            errorDebug.put("error", "Usuario de GitHub no vinculado en la BD de SegundUM");
+            errorDebug.put("instrucciones", "Verifica que el 'login' o 'id' de abajo coincida con lo que tienes en tu tabla de usuarios");
+            errorDebug.put("datos_recibidos_de_github", atributos);
+
+            // 4. Lo escribimos en la pantalla
+            response.getWriter().write(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(errorDebug));
         }
     }
 }
