@@ -3,6 +3,7 @@ package SegundUM.Usuarios.rest.utils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Priority;
@@ -82,8 +83,12 @@ public class JwtTokenFilter implements ContainerRequestFilter {
                 requestContext.setProperty("claims", claims);
 
                 // Autorización basada en roles
-                Set<String> roles = new HashSet<>(
-                        Arrays.asList(claims.get("roles", String.class).split(",")));
+                @SuppressWarnings("unchecked")
+				List<String> rolesList = claims.get("roles", List.class);
+                Set<String> roles = new HashSet<>();
+                if (rolesList != null) {
+                	roles.addAll(rolesList);
+                }
 
                 // Consulta si la operación está protegida por rol
                 if (resourceInfo.getResourceMethod()

@@ -187,10 +187,19 @@ public class ProductoRestController {
         return pagedResourcesAssemblerRP.toModel(resumen);
     }
 
-    /** DELETE /productos/{id} — Eliminar un producto */
+    /** DELETE /productos/{id} — Eliminar un producto  (auth anyadida despues)*/
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('USUARIO')")
     public ResponseEntity<Void> eliminarProducto(@PathVariable("id") String productoId) throws ServicioException, EntidadNoEncontrada {
-        servicioProductos.eliminarProducto(productoId);
+        
+    	Producto producto = servicioProductos.getProductoPorId(productoId);
+    	String usuarioLogueado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        if (!producto.getVendedorId().equals(usuarioLogueado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    	
+    	servicioProductos.eliminarProducto(productoId);
         return ResponseEntity.noContent().build();
     }
 }

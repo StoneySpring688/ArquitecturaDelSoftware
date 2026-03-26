@@ -43,11 +43,18 @@ public class SecuritySuccessHandler implements AuthenticationSuccessHandler {
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         
         // El ID de GitHub suele venir en el atributo "login" o "id"
-        // Según el enunciado, debemos buscar al usuario en el microservicio Usuarios por su id de GitHub
-        String githubId = oauthUser.getAttributes().get("login").toString();
-        logger.info("Autenticacion OAuth2 exitosa para GitHub ID: {}", githubId);
-
+        String githubId = oauthUser.getAttributes().get("id").toString();
+        
         UsuarioDTO usuario = puertoUsuarios.verificarGitHub(githubId);
+
+        if (usuario == null) {
+            // Si el usuario de GitHub no está registrado en SegundUM, lo registramos automáticamente
+            String nombre = oauthUser.getAttribute("name");
+            if (nombre == null) nombre = oauthUser.getAttribute("login");
+            String email = oauthUser.getAttribute("email");
+            
+            usuario = puertoUsuarios.registrarUsuarioGitHub(githubId, nombre, email);
+        }
 
         if (usuario != null) {
             List<String> roles = new ArrayList<>();
@@ -80,6 +87,26 @@ public class SecuritySuccessHandler implements AuthenticationSuccessHandler {
             // Si el usuario de GitHub no está registrado en SegundUM
             logger.warn("Usuario de GitHub no vinculado a SegundUM: {}", githubId);
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Usuario de GitHub no vinculado a SegundUM");
+        	
+        	//TODO para desarrollo
+			/*
+			 * DefaultOAuth2User oauthUserOnError = (DefaultOAuth2User)
+			 * authentication.getPrincipal(); Map<String, Object> atributos =
+			 * oauthUserOnError.getAttributes();
+			 * 
+			 * response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			 * response.setContentType("application/json;charset=UTF-8");
+			 * 
+			 * Map<String, Object> errorDebug = new HashMap<>(); errorDebug.put("error",
+			 * "Usuario de GitHub no vinculado en la BD de SegundUM");
+			 * errorDebug.put("instrucciones",
+			 * "Verifica que el 'login' o 'id' de abajo coincida con lo que tienes en tu tabla de usuarios"
+			 * ); errorDebug.put("datos_recibidos_de_github", atributos);
+			 * 
+			 * // 4. Lo escribimos en la pantalla
+			 * response.getWriter().write(objectMapper.writerWithDefaultPrettyPrinter().
+			 * writeValueAsString(errorDebug));
+			 */
         }
     }
 }

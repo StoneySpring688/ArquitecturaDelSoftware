@@ -44,7 +44,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Liberar puertos por si quedaron procesos anteriores
-for port in 8080 8081 8082; do
+for port in 8080 8081 8082 8090; do
     fuser -k $port/tcp 2>/dev/null
 done
 
@@ -102,15 +102,27 @@ log_ok "Compraventas arrancando en segundo plano (PID: ${PIDS[-1]})"
 echo ""
 
 # ============================================================
+# 5. Arrancar Pasarela (puerto 8090)
+# ============================================================
+log_info "=== Paso 5: Arrancando microservicio PASARELA (puerto 8090) ==="
+
+cd "$PROYECTO_DIR/pasarela"
+mvn -q spring-boot:run &
+PIDS+=($!)
+log_ok "Pasarela arrancando en segundo plano (PID: ${PIDS[-1]})"
+echo ""
+
+# ============================================================
 # Resumen
 # ============================================================
 log_ok "=========================================="
 log_ok " Todos los microservicios arrancados"
 log_ok "=========================================="
 echo ""
-log_info "Productos:    http://localhost:8080/api/productos"
-log_info "Usuarios:     http://localhost:8081/api/usuarios"
-log_info "Compraventas: http://localhost:8082/api/compraventas"
+log_info "Pasarela (Gateway): http://localhost:8090"
+log_info "Productos:    http://localhost:8090/productos"
+log_info "Usuarios:     http://localhost:8090/usuarios"
+log_info "Compraventas: http://localhost:8090/compraventas"
 echo ""
 log_info "Presiona Ctrl+C para detener todos los microservicios"
 echo ""

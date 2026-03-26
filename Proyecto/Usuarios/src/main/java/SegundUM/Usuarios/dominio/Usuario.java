@@ -21,13 +21,14 @@ public class Usuario implements Identificable {
     @Column(nullable = false)
     private String nombre;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String apellidos;
     
-    @Column(nullable = false)
+    // se queda nullable para permitir oauth2
+    @Column(nullable = true)
     private String clave;
     
-    @Column(name = "fecha_nacimiento", nullable = false)
+    @Column(name = "fecha_nacimiento", nullable = true)
     private LocalDate fechaNacimiento;
 
     private int comprasRealizadas;
@@ -39,7 +40,7 @@ public class Usuario implements Identificable {
     @Column(nullable = false)
     private boolean administrador;
 
-    @Column(name = "id_github", unique = true)
+    @Column(name = "id_github", unique = true, nullable = true)
     private String idGitHub;
 
     /**

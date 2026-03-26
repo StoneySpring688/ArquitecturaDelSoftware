@@ -49,4 +49,9 @@ public interface ServicioUsuarios {
      * Obtiene un usuario por su identificador de GitHub.
      */
     Usuario getUsuarioPorIdGitHub(String idGitHub) throws ServicioException, EntidadNoEncontrada;
+
+    /**
+     * Da de alta un usuario a través de GitHub.
+     */
+    String altaUsuarioGitHub(String idGitHub, String nombre, String email) throws ServicioException;
 }
