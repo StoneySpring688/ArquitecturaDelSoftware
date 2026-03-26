@@ -13,13 +13,14 @@ public class RetrofitConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(RetrofitConfig.class);
 
-    private static final String USUARIOS_BASE_URL = "http://localhost:8081/api/";
+    @org.springframework.beans.factory.annotation.Value("${api.usuarios.url:http://localhost:8081/api/}")
+    private String usuariosBaseUrl;
 
     @Bean
     public UsuariosRestClient usuariosRestClient() {
-        logger.info("Configurando cliente Retrofit para Usuarios (URL: {})", USUARIOS_BASE_URL);
+        logger.info("Configurando cliente Retrofit para Usuarios (URL: {})", usuariosBaseUrl);
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(USUARIOS_BASE_URL)
+                .baseUrl(usuariosBaseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

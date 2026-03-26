@@ -29,7 +29,7 @@ import SegundUM.Usuarios.servicio.usuarios.ServicioUsuariosImpl;
 public class App {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class);
-    private static final String BASE_URI = "http://localhost:8081/api/";
+    private static final String BASE_URI = "http://0.0.0.0:8081/api/";
 
     public static void main(String[] args) {
         try {

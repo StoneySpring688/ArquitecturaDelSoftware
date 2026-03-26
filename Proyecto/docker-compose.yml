@@ -1,0 +1,165 @@
+name: segundum
+
+services:
+
+  # ========================
+  # Infraestructura
+  # ========================
+
+  mysql:
+    image: mysql:8.0
+    container_name: segundum-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongodb:
+    image: mongo:7
+    container_name: segundum-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: compraventas
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: segundum-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq-definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ========================
+  # Microservicios
+  # ========================
+
+  productos:
+    build:
+      context: ./Productos
+    container_name: segundum-productos
+    ports:
+      - "8080:8080"
+    environment:
+      # MySQL
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/segundumProductos?serverTimezone=CET&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: usuario_productos
+      SPRING_DATASOURCE_PASSWORD: productos2026
+      # RabbitMQ
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      SPRING_RABBITMQ_SSL_ENABLED: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  usuarios:
+    build:
+      context: ./Usuarios
+    container_name: segundum-usuarios
+    ports:
+      - "8081:8081"
+    environment:
+      # MySQL
+      DB_URL: jdbc:mysql://mysql:3306/segundumUsuarios?serverTimezone=CET&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USER: usuario_usuarios
+      DB_PASSWORD: usuarios2026
+      # RabbitMQ
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+      RABBITMQ_SSL: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  compraventas:
+    build:
+      context: ./Compraventas
+    container_name: segundum-compraventas
+    ports:
+      - "8082:8082"
+    environment:
+      # MongoDB local (en vez de Atlas)
+      SPRING_MONGODB_URI: mongodb://mongodb:27017/compraventas
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/compraventas
+      # URLs de otros microservicios
+      API_PRODUCTOS_URL: http://productos:8080/api/productos/
+      API_USUARIOS_URL: http://usuarios:8081/api/usuarios/
+      API_USUARIOS_AUTH_URL: http://usuarios:8081/api/auth/
+      # RabbitMQ
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      SPRING_RABBITMQ_SSL_ENABLED: "false"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      productos:
+        condition: service_started
+      usuarios:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  pasarela:
+    build:
+      context: ./pasarela
+    container_name: segundum-pasarela
+    ports:
+      - "8090:8090"
+    environment:
+      # Rutas Zuul apuntando a los contenedores
+      ZUUL_ROUTES_PRODUCTOS_URL: http://productos:8080/api/productos
+      ZUUL_ROUTES_CATEGORIAS_URL: http://productos:8080/api/categorias
+      ZUUL_ROUTES_USUARIOS_URL: http://usuarios:8081/api/usuarios
+      ZUUL_ROUTES_COMPRAVENTAS_URL: http://compraventas:8082/api/compraventas
+      # Retrofit URL para Usuarios
+      API_USUARIOS_URL: http://usuarios:8081/api/
+    depends_on:
+      productos:
+        condition: service_started
+      usuarios:
+        condition: service_started
+      compraventas:
+        condition: service_started
+
+volumes:
+  mysql-data:
+  mongo-data:
