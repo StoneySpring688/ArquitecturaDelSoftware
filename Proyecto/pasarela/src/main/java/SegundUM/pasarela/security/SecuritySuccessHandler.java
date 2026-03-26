@@ -39,7 +39,6 @@ public class SecuritySuccessHandler implements AuthenticationSuccessHandler {
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         
         // El ID de GitHub suele venir en el atributo "login" o "id"
-        // Según el enunciado, debemos buscar al usuario en el microservicio Usuarios por su id de GitHub
         String githubId = oauthUser.getAttributes().get("login").toString();
         
         UsuarioDTO usuario = puertoUsuarios.verificarGitHub(githubId);

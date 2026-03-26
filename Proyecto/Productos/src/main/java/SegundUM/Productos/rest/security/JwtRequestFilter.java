@@ -50,7 +50,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                // Parsear el token (la validación de firma/caducidad ya la hizo la Pasarela)
                 Claims claims = Jwts.parser()
                         .setSigningKey(SECRETO.getBytes())
                         .parseClaimsJws(jwt)
