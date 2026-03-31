@@ -1,6 +1,7 @@
 package SegundUM.Usuarios.rest.controllers;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,16 +29,18 @@ import SegundUM.Usuarios.servicio.usuarios.ServicioUsuarios;
  * Controlador de autenticación.
  * Gestiona el registro y login de usuarios, emitiendo tokens JWT.
  * 
- * @deprecated Deshabilitado según Tarea 8. La autenticación ahora la gestiona la pasarela.
+ * Compraventas usa POST /auth/login via Retrofit para verificar credenciales del comprador, por lo que
+ * pasarela gestiona la auntenticación de cliente externos y este controlador se centra en la autenticación de usuarios internos.
  */
-// @Path("/auth")
+@Path("/auth")  
 @Deprecated
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    public static final String SECRET_KEY = "clave_secreta_segund_um_2026";
+    // Mismo secreto que la pasarela y el JwtTokenFilter para que los tokens sean compatibles
+    public static final String SECRET_KEY = "secreto_compartido_segundum_2026";
     private ServicioUsuarios servicioUsuarios;
 
     public AuthController() {
@@ -59,20 +62,20 @@ public class AuthController {
             
             logger.debug("Login correcto en servicio para usuario ID: {}", usuario.getId());
 
-            // Construir los claims del token
+            // Construir los claims del token (formato compatible con pasarela y JwtTokenFilter)
             Map<String, Object> claims = new HashMap<>();
             claims.put("sub", usuario.getId());
             claims.put("name", usuario.getNombre());
-            claims.put("roles", "USUARIO");
+            claims.put("roles", Arrays.asList("USUARIO"));  
 
-            // Fecha de caducidad: 1 hora
+            // Fecha de caducidad: 10 días (igual que la pasarela)
             Date caducidad = Date.from(
-                    Instant.now().plusSeconds(3600));
+                    Instant.now().plusSeconds(864000));
 
-            // Generar el token JWT
+            // Generar el token JWT con HS512 (mismo algoritmo que la pasarela)
             String token = Jwts.builder()
                     .setClaims(claims)
-                    .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                    .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes())
                     .setExpiration(caducidad)
                     .compact();
             

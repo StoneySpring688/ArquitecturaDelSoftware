@@ -1,0 +1,713 @@
+{
+	"info": {
+		"name": "SegundUM - Docker Tests (Completa)",
+		"description": "Pruebas COMPLETAS de todos los endpoints de los microservicios.\n\nTodas las peticiones pasan por la pasarela Zuul (puerto 8090) salvo:\n- Registro de usuarios (la pasarela exige JWT para /usuarios/**)\n- Eliminación de usuarios (Zuul añade Transfer-Encoding chunked incompatible con JAX-RS)\n\nEndpoints NO probados:\n- GET /usuarios/ (listar todos): bug del servicio JAX-RS, devuelve 405\n- POST /auth (Usuarios): deprecated, la autenticación la gestiona la pasarela\n\nFlujo: Salud → Registro → Login → Usuarios → Categorías → Productos CRUD → Compraventas → RabbitMQ → Seguridad → Limpieza",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "gateway_url", "value": "http://localhost:8090" },
+		{ "key": "productos_url", "value": "http://localhost:8080" },
+		{ "key": "usuarios_url", "value": "http://localhost:8081" },
+		{ "key": "compraventas_url", "value": "http://localhost:8082" },
+		{ "key": "seller_jwt", "value": "" },
+		{ "key": "buyer_jwt", "value": "" },
+		{ "key": "seller_id", "value": "" },
+		{ "key": "seller_email", "value": "" },
+		{ "key": "buyer_id", "value": "" },
+		{ "key": "buyer_email", "value": "" },
+		{ "key": "user_password", "value": "TestPassword2026" },
+		{ "key": "producto_id", "value": "" },
+		{ "key": "producto_rabbit_id", "value": "" },
+		{ "key": "categoria_id", "value": "cat-test-001" }
+	],
+	"item": [
+		{
+			"name": "1. Salud de Servicios",
+			"item": [
+				{
+					"name": "Productos - Swagger accesible",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Productos arrancado', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET", "header": [],
+						"url": { "raw": "{{productos_url}}/swagger-ui/index.html", "host": ["{{productos_url}}"], "path": ["swagger-ui", "index.html"] }
+					}
+				},
+				{
+					"name": "Compraventas - Swagger accesible",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Compraventas arrancado', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET", "header": [],
+						"url": { "raw": "{{compraventas_url}}/swagger-ui/index.html", "host": ["{{compraventas_url}}"], "path": ["swagger-ui", "index.html"] }
+					}
+				},
+				{
+					"name": "Pasarela - Auth endpoint accesible",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Pasarela arrancada', function () { pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 405]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{}" },
+						"url": { "raw": "{{gateway_url}}/auth/login", "host": ["{{gateway_url}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "RabbitMQ Management accesible",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('RabbitMQ accesible', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET", "header": [],
+						"url": { "raw": "http://localhost:15672/", "host": ["http://localhost:15672"], "path": [""] }
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Registro y Autenticación",
+			"description": "Registro directo a Usuarios (pasarela requiere JWT para /usuarios/**). Login y logout via pasarela.",
+			"item": [
+				{
+					"name": "Registrar vendedor (directo - pasarela exige JWT)",
+					"event": [
+						{ "listen": "prerequest", "script": { "exec": [
+							"var ts = Date.now();",
+							"pm.collectionVariables.set('seller_email', 'seller' + ts + '@segundum.com');"
+						], "type": "text/javascript" }},
+						{ "listen": "test", "script": { "exec": [
+							"pm.test('Vendedor registrado (201)', function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							"if (pm.response.code === 200 || pm.response.code === 201) {",
+							"    var body = pm.response.text().replace(/\\\"/g, '');",
+							"    pm.collectionVariables.set('seller_id', body);",
+							"}"
+						], "type": "text/javascript" }}
+					],
+					"request": { "method": "POST", "header": [],
+						"url": {
+							"raw": "{{usuarios_url}}/api/usuarios/?email={{seller_email}}&nombre=Vendedor&apellidos=TestDocker&clave={{user_password}}&fechaNacimiento=1995-06-15&telefono=612345678",
+							"host": ["{{usuarios_url}}"], "path": ["api", "usuarios", ""],
+							"query": [
+								{ "key": "email", "value": "{{seller_email}}" },
+								{ "key": "nombre", "value": "Vendedor" },
+								{ "key": "apellidos", "value": "TestDocker" },
+								{ "key": "clave", "value": "{{user_password}}" },
+								{ "key": "fechaNacimiento", "value": "1995-06-15" },
+								{ "key": "telefono", "value": "612345678" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Login vendedor via Pasarela",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Login vendedor exitoso (200)', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('token');",
+						"    pm.expect(json.token).to.be.a('string').and.not.empty;",
+						"});",
+						"var json = pm.response.json();",
+						"if (json.token) { pm.collectionVariables.set('seller_jwt', json.token); }",
+						"if (json.id) { pm.collectionVariables.set('seller_id', json.id); }",
+						"pm.test('Respuesta contiene nombre y rol USUARIO', function () {",
+						"    pm.expect(json).to.have.property('nombre');",
+						"    pm.expect(json).to.have.property('roles');",
+						"    pm.expect(json.roles).to.include('USUARIO');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n    \"email\": \"{{seller_email}}\",\n    \"clave\": \"{{user_password}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/auth/login", "host": ["{{gateway_url}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "Registrar comprador (directo - pasarela exige JWT)",
+					"event": [
+						{ "listen": "prerequest", "script": { "exec": [
+							"var ts = Date.now();",
+							"pm.collectionVariables.set('buyer_email', 'buyer' + ts + '@segundum.com');"
+						], "type": "text/javascript" }},
+						{ "listen": "test", "script": { "exec": [
+							"pm.test('Comprador registrado (201)', function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							"if (pm.response.code === 200 || pm.response.code === 201) {",
+							"    var body = pm.response.text().replace(/\\\"/g, '');",
+							"    pm.collectionVariables.set('buyer_id', body);",
+							"}"
+						], "type": "text/javascript" }}
+					],
+					"request": { "method": "POST", "header": [],
+						"url": {
+							"raw": "{{usuarios_url}}/api/usuarios/?email={{buyer_email}}&nombre=Comprador&apellidos=TestDocker&clave={{user_password}}&fechaNacimiento=1998-03-20&telefono=698765432",
+							"host": ["{{usuarios_url}}"], "path": ["api", "usuarios", ""],
+							"query": [
+								{ "key": "email", "value": "{{buyer_email}}" },
+								{ "key": "nombre", "value": "Comprador" },
+								{ "key": "apellidos", "value": "TestDocker" },
+								{ "key": "clave", "value": "{{user_password}}" },
+								{ "key": "fechaNacimiento", "value": "1998-03-20" },
+								{ "key": "telefono", "value": "698765432" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Login comprador via Pasarela",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Login comprador exitoso (200)', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('token');",
+						"});",
+						"var json = pm.response.json();",
+						"if (json.token) { pm.collectionVariables.set('buyer_jwt', json.token); }",
+						"if (json.id) { pm.collectionVariables.set('buyer_id', json.id); }"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n    \"email\": \"{{buyer_email}}\",\n    \"clave\": \"{{user_password}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/auth/login", "host": ["{{gateway_url}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "Login con credenciales incorrectas via Pasarela",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Login rechazado (401)', function () { pm.expect(pm.response.code).to.be.oneOf([401, 403, 400]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n    \"email\": \"noexiste@test.com\",\n    \"clave\": \"claveIncorrecta\"\n}" },
+						"url": { "raw": "{{gateway_url}}/auth/login", "host": ["{{gateway_url}}"], "path": ["auth", "login"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Usuarios via Gateway",
+			"description": "Endpoints de Usuarios reenviados por Zuul (/usuarios/** → Usuarios:8081).\nNota: GET /usuarios/ (listar todos) omitido por bug del servicio JAX-RS (405).",
+			"item": [
+				{
+					"name": "GET /usuarios/{id} - Obtener vendedor por ID",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Usuario obtenido via gateway (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Datos del usuario correctos', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('email');",
+						"    pm.expect(json).to.have.property('nombre', 'Vendedor');",
+						"    pm.expect(json).to.have.property('apellidos', 'TestDocker');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/usuarios/{{seller_id}}", "host": ["{{gateway_url}}"], "path": ["usuarios", "{{seller_id}}"] }
+					}
+				},
+				{
+					"name": "GET /usuarios/verificar - Verificar credenciales",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Credenciales verificadas (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Datos del usuario en respuesta', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('email');",
+						"    pm.expect(json).to.have.property('nombre');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": {
+							"raw": "{{gateway_url}}/usuarios/verificar?email={{seller_email}}&clave={{user_password}}",
+							"host": ["{{gateway_url}}"], "path": ["usuarios", "verificar"],
+							"query": [
+								{ "key": "email", "value": "{{seller_email}}" },
+								{ "key": "clave", "value": "{{user_password}}" }
+							]
+						}
+					}
+				},
+				{
+					"name": "GET /usuarios/verificar-github - GitHub ID inexistente (404)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('GitHub ID no encontrado (404)', function () { pm.expect(pm.response.code).to.be.oneOf([404, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": {
+							"raw": "{{gateway_url}}/usuarios/verificar-github?idGitHub=inexistente123",
+							"host": ["{{gateway_url}}"], "path": ["usuarios", "verificar-github"],
+							"query": [{ "key": "idGitHub", "value": "inexistente123" }]
+						}
+					}
+				},
+				{
+					"name": "PUT /usuarios/{id} - Actualizar vendedor via Gateway",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Usuario actualizado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "PUT",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": {
+							"raw": "{{gateway_url}}/usuarios/{{seller_id}}?nombre=VendedorActualizado&telefono=611111111",
+							"host": ["{{gateway_url}}"], "path": ["usuarios", "{{seller_id}}"],
+							"query": [
+								{ "key": "nombre", "value": "VendedorActualizado" },
+								{ "key": "telefono", "value": "611111111" }
+							]
+						}
+					}
+				},
+				{
+					"name": "GET /usuarios/{id} - Verificar actualización via Gateway",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Datos actualizados correctamente', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    pm.expect(json.nombre).to.eql('VendedorActualizado');",
+						"    pm.expect(json.telefono).to.eql('611111111');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/usuarios/{{seller_id}}", "host": ["{{gateway_url}}"], "path": ["usuarios", "{{seller_id}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Categorías via Gateway",
+			"description": "Endpoints de categorías (/categorias/** → Productos:8080)",
+			"item": [
+				{
+					"name": "GET /categorias - Listar categorías (paginado HATEOAS)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Categorías obtenidas (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Respuesta HATEOAS con _links', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('_links');",
+						"});",
+						"var json = pm.response.json();",
+						"if (json._embedded && json._embedded.categoriaDTOList && json._embedded.categoriaDTOList.length > 0) {",
+						"    pm.collectionVariables.set('categoria_id', json._embedded.categoriaDTOList[0].id);",
+						"}"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/categorias?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["categorias"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "GET /categorias/{id} - Obtener categoría por ID (HATEOAS)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Categoría obtenida (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Tiene nombre y links HATEOAS', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('nombre');",
+						"    pm.expect(json).to.have.property('_links');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/categorias/{{categoria_id}}", "host": ["{{gateway_url}}"], "path": ["categorias", "{{categoria_id}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Productos via Gateway - CRUD completo",
+			"description": "TODOS los endpoints de Productos (/productos/** → Productos:8080)",
+			"item": [
+				{
+					"name": "GET /productos/buscar - Buscar productos (HATEOAS)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Búsqueda OK (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Respuesta HATEOAS', function () { pm.expect(pm.response.json()).to.have.property('_links'); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/buscar?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["productos", "buscar"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "GET /productos/historial - Historial mensual",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Historial mensual obtenido (200)', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/historial?mes=3&anio=2026", "host": ["{{gateway_url}}"], "path": ["productos", "historial"],
+							"query": [{ "key": "mes", "value": "3" }, { "key": "anio", "value": "2026" }] }
+					}
+				},
+				{
+					"name": "GET /productos/historial/{email} - Historial por vendedor",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Historial por vendedor obtenido (200)', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/historial/{{seller_email}}?mes=3&anio=2026", "host": ["{{gateway_url}}"], "path": ["productos", "historial", "{{seller_email}}"],
+							"query": [{ "key": "mes", "value": "3" }, { "key": "anio", "value": "2026" }] }
+					}
+				},
+				{
+					"name": "POST /productos - Crear producto (vendedor autenticado)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto creado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+						"if (pm.response.code === 200 || pm.response.code === 201) {",
+						"    var body = pm.response.text().replace(/\\\"/g, '');",
+						"    pm.collectionVariables.set('producto_id', body);",
+						"}"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"titulo\": \"Portatil HP Pavilion\",\n    \"descripcion\": \"Portatil en buen estado para pruebas automatizadas\",\n    \"precio\": 250.00,\n    \"estado\": \"BUEN_ESTADO\",\n    \"envioDisponible\": true,\n    \"vendedorId\": \"{{seller_id}}\",\n    \"categoriaId\": \"{{categoria_id}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/productos", "host": ["{{gateway_url}}"], "path": ["productos"] }
+					}
+				},
+				{
+					"name": "GET /productos/{id} - Obtener producto creado",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto obtenido (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Datos del producto correctos', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('titulo', 'Portatil HP Pavilion');",
+						"    pm.expect(json.precio).to.eql(250.0);",
+						"    pm.expect(json).to.have.property('vendedorId');",
+						"    pm.expect(json).to.have.property('categoriaId');",
+						"    pm.expect(json.estado).to.eql('BUEN_ESTADO');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}"] }
+					}
+				},
+				{
+					"name": "PUT /productos/{id} - Modificar precio y descripción",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto modificado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"descripcion\": \"Precio rebajado - ganga\",\n    \"precio\": 199.99,\n    \"vendedorId\": \"{{seller_id}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}"] }
+					}
+				},
+				{
+					"name": "GET /productos/{id} - Verificar modificación",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Modificación verificada', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    pm.expect(json.descripcion).to.eql('Precio rebajado - ganga');",
+						"    pm.expect(json.precio).to.eql(199.99);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}"] }
+					}
+				},
+				{
+					"name": "PUT /productos/{id}/recogida - Asociar lugar de recogida",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Lugar de recogida asociado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"descripcion\": \"Campus de Espinardo, Edificio 33\",\n    \"longitud\": -1.1743,\n    \"latitud\": 38.0214\n}" },
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}/recogida", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}", "recogida"] }
+					}
+				},
+				{
+					"name": "PUT /productos/{id}/visualizaciones - Registrar visualización",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Visualización registrada (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "PUT",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}/visualizaciones", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}", "visualizaciones"] }
+					}
+				},
+				{
+					"name": "GET /productos/vendedor/{id} - Productos del vendedor",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Productos del vendedor (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Al menos un producto en la lista', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('_embedded');",
+						"    pm.expect(json._embedded.productoDTOList.length).to.be.greaterThan(0);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/vendedor/{{seller_id}}?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["productos", "vendedor", "{{seller_id}}"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "DELETE /productos/{id} - Eliminar producto via Gateway",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto eliminado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}"] }
+					}
+				},
+				{
+					"name": "GET /productos/{id} - Verificar eliminación (404)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto ya no existe (404)', function () { pm.expect(pm.response.code).to.be.oneOf([404, 500]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_id}}", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_id}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Compraventas via Gateway",
+			"description": "Endpoints de Compraventas (/compraventas/** → Compraventas:8082).\nRequiere crear un producto nuevo para la compra (comunicación inter-servicio HTTP via Retrofit).",
+			"item": [
+				{
+					"name": "POST /productos - Crear producto para compra",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Producto para compra creado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+						"if (pm.response.code === 200 || pm.response.code === 201) {",
+						"    var body = pm.response.text().replace(/\\\"/g, '');",
+						"    pm.collectionVariables.set('producto_rabbit_id', body);",
+						"}"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"titulo\": \"Teclado mecanico para compraventa\",\n    \"descripcion\": \"Producto que sera comprado para probar compraventas y RabbitMQ\",\n    \"precio\": 45.00,\n    \"estado\": \"COMO_NUEVO\",\n    \"envioDisponible\": false,\n    \"vendedorId\": \"{{seller_id}}\",\n    \"categoriaId\": \"{{categoria_id}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/productos", "host": ["{{gateway_url}}"], "path": ["productos"] }
+					}
+				},
+				{
+					"name": "PUT /productos/{id}/recogida - Asignar recogida al producto de compra",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Recogida asignada al producto de compra (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"descripcion\": \"Facultad de Informatica, UMU\",\n    \"longitud\": -1.1700,\n    \"latitud\": 38.0200\n}" },
+						"url": { "raw": "{{gateway_url}}/productos/{{producto_rabbit_id}}/recogida", "host": ["{{gateway_url}}"], "path": ["productos", "{{producto_rabbit_id}}", "recogida"] }
+					}
+				},
+				{
+					"name": "POST /compraventas - Realizar compra (comprador autenticado)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Compra realizada (201)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{buyer_jwt}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "{\n    \"idProducto\": \"{{producto_rabbit_id}}\",\n    \"idComprador\": \"{{buyer_id}}\",\n    \"emailComprador\": \"{{buyer_email}}\",\n    \"claveComprador\": \"{{user_password}}\"\n}" },
+						"url": { "raw": "{{gateway_url}}/compraventas", "host": ["{{gateway_url}}"], "path": ["compraventas"] }
+					}
+				},
+				{
+					"name": "GET /compraventas/comprador/{id} - Historial compras (HATEOAS)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Historial de compras (200)', function () { pm.response.to.have.status(200); });",
+						"pm.test('Respuesta HATEOAS con _links', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('_links');",
+						"});",
+						"pm.test('Tiene compras registradas (_embedded)', function () {",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('_embedded');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{buyer_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/compraventas/comprador/{{buyer_id}}?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["compraventas", "comprador", "{{buyer_id}}"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "GET /compraventas/vendedor/{id} - Historial ventas",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Historial de ventas (200)', function () { pm.response.to.have.status(200); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/compraventas/vendedor/{{seller_id}}?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["compraventas", "vendedor", "{{seller_id}}"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "GET /compraventas/entre - Solo ADMINISTRADOR (403/500)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Endpoint /entre requiere rol ADMINISTRADOR', function () {",
+						"    pm.expect(pm.response.code).to.be.oneOf([403, 500]);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": {
+							"raw": "{{gateway_url}}/compraventas/entre?idComprador={{buyer_id}}&idVendedor={{seller_id}}&page=0&size=10",
+							"host": ["{{gateway_url}}"], "path": ["compraventas", "entre"],
+							"query": [
+								{ "key": "idComprador", "value": "{{buyer_id}}" },
+								{ "key": "idVendedor", "value": "{{seller_id}}" },
+								{ "key": "page", "value": "0" },
+								{ "key": "size", "value": "10" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. RabbitMQ - Comunicación entre servicios",
+			"description": "Verifica que los eventos RabbitMQ funcionan:\n- Eliminar usuario → evento usuario-eliminado → Productos elimina sus productos automáticamente",
+			"item": [
+				{
+					"name": "GET /productos/vendedor/{seller} - Producto existe antes de borrar usuario",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Vendedor tiene productos antes del borrado', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    pm.expect(json).to.have.property('_embedded');",
+						"    pm.expect(json._embedded.productoDTOList.length).to.be.greaterThan(0);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/vendedor/{{seller_id}}?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["productos", "vendedor", "{{seller_id}}"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				},
+				{
+					"name": "DELETE /usuarios/{seller} - Eliminar vendedor (directo, publica evento RabbitMQ)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Vendedor eliminado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{seller_jwt}}" }],
+						"url": { "raw": "{{usuarios_url}}/api/usuarios/{{seller_id}}", "host": ["{{usuarios_url}}"], "path": ["api", "usuarios", "{{seller_id}}"] }
+					}
+				},
+				{
+					"name": "Espera propagación evento RabbitMQ (2s)",
+					"event": [
+						{ "listen": "prerequest", "script": { "exec": [
+							"// Esperar 2 segundos para que el evento RabbitMQ se propague",
+							"setTimeout(function(){}, 2000);"
+						], "type": "text/javascript" }},
+						{ "listen": "test", "script": { "exec": [
+							"pm.test('Pausa para propagación RabbitMQ completada', function () {",
+							"    pm.expect(true).to.be.true;",
+							"});"
+						], "type": "text/javascript" }}
+					],
+					"request": { "method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:15672/", "host": ["http://localhost:15672"], "path": [""] }
+					}
+				},
+				{
+					"name": "GET /productos/vendedor/{seller} - Productos eliminados por RabbitMQ",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('RabbitMQ: productos del vendedor eliminados automaticamente', function () {",
+						"    pm.response.to.have.status(200);",
+						"    var json = pm.response.json();",
+						"    // Sin _embedded = no hay productos (fueron eliminados por el evento)",
+						"    pm.expect(json).to.not.have.property('_embedded');",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{buyer_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/productos/vendedor/{{seller_id}}?page=0&size=10", "host": ["{{gateway_url}}"], "path": ["productos", "vendedor", "{{seller_id}}"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Seguridad",
+			"description": "Verifica que los servicios protegen sus endpoints correctamente",
+			"item": [
+				{
+					"name": "POST /productos sin JWT via servicio directo (401/403)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Crear producto sin JWT rechazado', function () {",
+						"    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\"titulo\":\"hack\",\"precio\":1,\"estado\":\"NUEVO\",\"envioDisponible\":false,\"vendedorId\":\"x\",\"categoriaId\":\"x\"}" },
+						"url": { "raw": "{{productos_url}}/api/productos", "host": ["{{productos_url}}"], "path": ["api", "productos"] }
+					}
+				},
+				{
+					"name": "GET /compraventas sin JWT via servicio directo (401/403)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Compraventas sin JWT rechazado', function () {",
+						"    pm.expect(pm.response.code).to.be.oneOf([401, 403, 500]);",
+						"});"
+					], "type": "text/javascript" }}],
+					"request": { "method": "GET",
+						"header": [],
+						"url": { "raw": "{{compraventas_url}}/api/compraventas/comprador/test?page=0&size=10", "host": ["{{compraventas_url}}"], "path": ["api", "compraventas", "comprador", "test"],
+							"query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Limpieza",
+			"description": "Eliminar datos de prueba restantes",
+			"item": [
+				{
+					"name": "DELETE /usuarios/{buyer} - Eliminar comprador (directo)",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Comprador eliminado (204)', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{buyer_jwt}}" }],
+						"url": { "raw": "{{usuarios_url}}/api/usuarios/{{buyer_id}}", "host": ["{{usuarios_url}}"], "path": ["api", "usuarios", "{{buyer_id}}"] }
+					}
+				},
+				{
+					"name": "POST /auth/logout via Gateway",
+					"event": [{ "listen": "test", "script": { "exec": [
+						"pm.test('Logout OK', function () { pm.expect(pm.response.code).to.be.oneOf([200, 204]); });"
+					], "type": "text/javascript" }}],
+					"request": { "method": "POST",
+						"header": [{ "key": "Authorization", "value": "Bearer {{buyer_jwt}}" }],
+						"url": { "raw": "{{gateway_url}}/auth/logout", "host": ["{{gateway_url}}"], "path": ["auth", "logout"] }
+					}
+				}
+			]
+		}
+	]
+}

@@ -116,5 +116,7 @@ buildNumber.properties
 .vscode/
 
 GEMINI.md
+CLAUDE.md 
+.claude/
 
 # End of https://www.toptal.com/developers/gitignore/api/java,eclipse,maven
