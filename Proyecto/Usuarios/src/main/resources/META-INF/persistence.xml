@@ -8,7 +8,7 @@
         <properties>
             <property name="javax.persistence.jdbc.driver"
                 value="com.mysql.cj.jdbc.Driver" />
-            <property name="javax.persistence.jdbc.user" 
+            <property name="javax.persistence.jdbc.user"
             	value="usuario_usuarios" />
             <property name="javax.persistence.jdbc.password"
                 value="usuarios2026" />

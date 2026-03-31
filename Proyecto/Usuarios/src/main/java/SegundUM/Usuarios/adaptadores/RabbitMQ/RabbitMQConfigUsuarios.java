@@ -37,15 +37,22 @@ public class RabbitMQConfigUsuarios {
             "bus.productos.producto-eliminado"
     };
 
-    // Credenciales CloudAMQP
-    private static final String HOST = "rat.rmq2.cloudamqp.com";
-    private static final int PORT = 5671;
-    private static final String USERNAME = "cfrvyzor";
-    private static final String PASSWORD = "Y2mLAqiR1mOFZBBnupB6UDZ6o9E778iX";
-    private static final String VIRTUAL_HOST = "cfrvyzor";
+    // Credenciales RabbitMQ (sobreescribibles con variables de entorno)
+    private static final String HOST = env("RABBITMQ_HOST", "rat.rmq2.cloudamqp.com");
+    private static final int PORT = Integer.parseInt(env("RABBITMQ_PORT", "5671"));
+    private static final String USERNAME = env("RABBITMQ_USERNAME", "cfrvyzor");
+    private static final String PASSWORD = env("RABBITMQ_PASSWORD", "Y2mLAqiR1mOFZBBnupB6UDZ6o9E778iX");
+    private static final String VIRTUAL_HOST = env("RABBITMQ_VHOST", "cfrvyzor");
+    private static final boolean USE_SSL = Boolean.parseBoolean(env("RABBITMQ_SSL", "true"));
+
+    private static String env(String name, String defaultValue) {
+        String value = System.getenv(name);
+        return value != null ? value : defaultValue;
+    }
 
     /**
-     * Crea y devuelve una ConnectionFactory configurada con SSL y las credenciales de CloudAMQP.
+     * Crea y devuelve una ConnectionFactory configurada con las credenciales de RabbitMQ.
+     * En Docker se usa sin SSL (RabbitMQ local); en produccion con SSL (CloudAMQP).
      */
     public static ConnectionFactory crearConnectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
@@ -55,10 +62,12 @@ public class RabbitMQConfigUsuarios {
         factory.setPassword(PASSWORD);
         factory.setVirtualHost(VIRTUAL_HOST);
         logger.info("Creando ConnectionFactory RabbitMQ para Usuarios (host: {})", HOST);
-        try {
-            factory.useSslProtocol();
-        } catch (Exception e) {
-            throw new RuntimeException("Error al configurar SSL para RabbitMQ", e);
+        if (USE_SSL) {
+            try {
+                factory.useSslProtocol();
+            } catch (Exception e) {
+                throw new RuntimeException("Error al configurar SSL para RabbitMQ", e);
+            }
         }
         return factory;
     }

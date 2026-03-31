@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * - Para rutas protegidas, valida el token JWT de la cabecera Authorization o cookie 'jwt'.
  * - Si la ruta tiene @RolesAllowed, verifica que el usuario tenga el rol adecuado.
  * - Pone la información del token (claims) como propiedad de la petición.
+ * @deprecated Deshabilitado según Tarea 8. La autenticación ahora la gestiona la pasarela.
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -82,12 +83,15 @@ public class JwtTokenFilter implements ContainerRequestFilter {
                 // Poner los claims como propiedad de la petición para que estén disponibles en el controlador
                 requestContext.setProperty("claims", claims);
 
-                // Autorización basada en roles
-                @SuppressWarnings("unchecked")
-				List<String> rolesList = claims.get("roles", List.class);
+                // Autorización basada en roles (soporta List<String> y String separado por comas)
                 Set<String> roles = new HashSet<>();
-                if (rolesList != null) {
-                	roles.addAll(rolesList);
+                Object rolesObj = claims.get("roles");
+                if (rolesObj instanceof java.util.List) {
+                    @SuppressWarnings("unchecked")
+                    java.util.List<String> rolesList = (java.util.List<String>) rolesObj;
+                    roles.addAll(rolesList);
+                } else if (rolesObj instanceof String) {
+                    roles.addAll(Arrays.asList(((String) rolesObj).split(",")));
                 }
 
                 // Consulta si la operación está protegida por rol
