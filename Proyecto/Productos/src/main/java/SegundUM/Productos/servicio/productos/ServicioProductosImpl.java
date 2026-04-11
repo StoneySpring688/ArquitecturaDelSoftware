@@ -160,10 +160,7 @@ public class ServicioProductosImpl implements ServicioProductos, PuertaEntradaEv
 
     	String vendedorId = null;
     	if (emailVendedor == null) {
-    		logger.info("USANDO VALOR DE PRUEBAS PARA ID DEL VENDEDOR, SE DEBE REEMPLAZAR POR LA CONSULTA A LA API DE USUARIOS");
-    		// TODO: vendedorId = clienteHttpUsuarios.obtenerIdPorEmail(emailVendedor);
-
-            vendedorId = "ID-TEMPORAL-PARA-PRUEBAS"; // TODO tempooral para pruebas sin la api
+    		throw new ServicioException("El email proporcionado es nulo");
        }
     	return repositorioProductos.getHistorialMes(mes, anio, vendedorId, pageable).map(ResumenProducto::fromEntity);
     }
