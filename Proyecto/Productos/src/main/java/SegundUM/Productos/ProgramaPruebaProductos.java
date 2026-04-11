@@ -14,6 +14,7 @@ import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.rest.App;
 
+@Deprecated(forRemoval = true, since = "fix_BrokenEndPoints")
 public class ProgramaPruebaProductos {
 
     // Inicializamos el Logger

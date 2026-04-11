@@ -52,7 +52,7 @@ public class ServicioProductosImpl implements ServicioProductos, PuertaEntradaEv
      */
     @Override
     public String altaProducto(String titulo, String descripcion, BigDecimal precio, EstadoProducto estado,
-    		String categoriaId, boolean envioDisponible, String vendedorId) throws ServicioException {
+    		String categoriaId, boolean envioDisponible, String vendedorId, LugarRecogida lugarRecogida) throws ServicioException {
 
     	// VERIFICACION: Obtener categoria y verificar que existe
     	Categoria categoria;
@@ -62,6 +62,7 @@ public class ServicioProductosImpl implements ServicioProductos, PuertaEntradaEv
     	String id = UUID.randomUUID().toString();
 
     	Producto p = new Producto(id, titulo, descripcion, precio, estado, categoria, envioDisponible, vendedorId);
+    	p.setRecogida(lugarRecogida);
 
     	repositorioProductos.save(p);
 
@@ -124,8 +125,6 @@ public class ServicioProductosImpl implements ServicioProductos, PuertaEntradaEv
 			logger.warn("Intento de modificacion no autorizada por usuario: " + idUsuarioSolicitante);
 			throw new ServicioException("No tienes permiso para editar este producto.");
 		}
-
-		String tituloAnterior = p.getTitulo();
 
 		if (nuevaDescripcion != null && !nuevaDescripcion.isEmpty()) {
 			p.setDescripcion(nuevaDescripcion);

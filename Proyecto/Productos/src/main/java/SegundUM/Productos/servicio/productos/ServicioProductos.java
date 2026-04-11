@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import SegundUM.Productos.dominio.EstadoProducto;
+import SegundUM.Productos.dominio.LugarRecogida;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
@@ -23,7 +24,7 @@ public interface ServicioProductos {
      */
     String altaProducto(String titulo, String descripcion, BigDecimal precio,
                         EstadoProducto estado, String categoriaId, boolean envioDisponible,
-                        String vendedorId) throws ServicioException;
+                        String vendedorId, LugarRecogida lugarRecogida) throws ServicioException;
 
     /**
      * Asigna lugar de recogida al producto.

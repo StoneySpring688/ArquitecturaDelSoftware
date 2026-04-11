@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import SegundUM.Productos.dominio.Categoria;
 import SegundUM.Productos.dominio.EstadoProducto;
+import SegundUM.Productos.dominio.LugarRecogida;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.servicio.ServicioException;
@@ -27,6 +28,7 @@ import SegundUM.Productos.servicio.productos.ServicioProductos;
  * </p>
  */
 @Component
+@Deprecated(forRemoval = true, since = "fix_BrokenEndPoints")
 public class ControllerProductos {
 
     private static final Logger logger = LoggerFactory.getLogger(ControllerProductos.class);
@@ -85,7 +87,7 @@ public class ControllerProductos {
             }
 
             return servicioProductos.altaProducto(titulo, descripcion, precio, estado, 
-                                                 categoriaId, envioDisponible, vendedorId);
+                                                 categoriaId, envioDisponible, vendedorId, new LugarRecogida(descripcion, null, null));
         } catch (ServicioException e) {
             logger.error("Error al dar de alta el producto: " + titulo, e);
             return null;
