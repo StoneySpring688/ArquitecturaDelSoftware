@@ -49,9 +49,10 @@ public class UsuarioRestController {
     }
 
     /** GET /usuarios — Listado de usuarios (usuario autenticado) */
-    // TODO como devuelve información que podría ser sensible, este endpoint debería ser solo para admins
+    // TODO Como devuelve información que podría ser sensible, este endpoint debería ser solo para admins
+    // TODO Se cambiará algún día, pero por ahora para ver que funciona...
     @GET
-    //@Path("/")
+    @Path("/getAll")
     @RolesAllowed("USUARIO")
     public Response getAllusuarios() throws ServicioException {
     	logger.info("Petición recibida: GET /usuarios (Obtener todos los usuarios)");
