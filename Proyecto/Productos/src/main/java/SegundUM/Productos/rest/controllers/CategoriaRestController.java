@@ -11,8 +11,11 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
 import SegundUM.Productos.rest.docs.CategoriasApi;
@@ -43,8 +46,18 @@ public class CategoriaRestController implements CategoriasApi {
         this.servicioCategorias = servicioCategorias;
     }
 
+    /** POST /api/categorias/cargar — Carga masiva de categorías (ADMIN) */
+    @Override
+    @PostMapping("/cargar")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
+    public ResponseEntity<String> cargarTodas() throws ServicioException {
+        logger.info("Peticion recibida: POST /api/categorias/cargar (ADMIN)");
+        int totalCargadas = servicioCategorias.cargarTodas();
+        return ResponseEntity.ok("Se han cargado " + totalCargadas + " ficheros de categorías correctamente.");
+    }
+
     /** GET /categorias/{id} — Obtener una categoría por ID */
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public EntityModel<CategoriaDTO> getCategoria(@PathVariable String id) throws ServicioException, EntidadNoEncontrada {
         logger.info("Peticion recibida: GET /categorias/{}", id);
         return EntityModel.of(CategoriaDTO.fromEntity(servicioCategorias.getCategoriaById(id)))
@@ -69,6 +82,7 @@ public class CategoriaRestController implements CategoriasApi {
         return ResponseEntity.ok(categoriasDTO);  
     }*/
     @Override
+    @GetMapping("/getAll")
     public PagedModel<EntityModel<CategoriaDTO>> getCategoriasPaginado(Pageable paginacion) throws ServicioException {
     	logger.info("Peticion recibida: GET /categorias (paginado)");
     	Page<CategoriaDTO> categoriasDTO = servicioCategorias.getCategoriasPaginado(paginacion)
