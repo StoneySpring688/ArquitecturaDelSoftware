@@ -2,16 +2,18 @@ package SegundUM.Productos.rest.dto;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.*;
-
-import org.springframework.hateoas.RepresentationModel;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import SegundUM.Productos.dominio.LugarRecogida;
 
-public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> implements Serializable {
-    private static final long serialVersionUID = 8886619346871580550L;
-    
-    @NotBlank(message = "La descripción del lugar es obligatoria")
+public class LugarRecogidaAltaProductoDTO implements Serializable {
+	private static final long serialVersionUID = 6385697183328793244L;
+
+	@NotBlank(message = "La descripción del lugar es obligatoria")
     @Size(max = 500, message = "La descripción no puede superar los 500 caracteres")
 	public String descripcion;
     
@@ -23,7 +25,7 @@ public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> impl
     @Min(-90) @Max(90)
     public Double latitud;
 
-    public LugarRecogidaDTO() {}
+    public LugarRecogidaAltaProductoDTO() {}
 
     public static LugarRecogidaDTO fromEntity(LugarRecogida entidad) {
         if (entidad == null) return null;
@@ -47,3 +49,4 @@ public class LugarRecogidaDTO extends RepresentationModel<LugarRecogidaDTO> impl
 				'}';
     }
 }
+

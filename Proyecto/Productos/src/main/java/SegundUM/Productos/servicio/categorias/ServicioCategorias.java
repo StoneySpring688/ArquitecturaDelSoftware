@@ -22,6 +22,12 @@ public interface ServicioCategorias {
     void cargarJerarquia(String ruta) throws ServicioException;
 
     /**
+     * Carga automáticamente todas las categorías que existan en la carpeta 'categoriasXML'.
+     * @return int número de ficheros cargados correctamente.
+     */
+    int cargarTodas() throws ServicioException;
+
+    /**
      * Modifica la descripción de una categoría.
      */
     void modificarDescripcion(String categoriaId, String nuevaDescripcion) throws ServicioException;

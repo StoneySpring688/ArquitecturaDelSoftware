@@ -33,6 +33,7 @@ import SegundUM.Productos.dominio.EstadoProducto;
 import SegundUM.Productos.dominio.Producto;
 import SegundUM.Productos.dominio.ResumenProducto;
 import SegundUM.Productos.repositorio.EntidadNoEncontrada;
+import SegundUM.Productos.rest.dto.AltaProductoDTO;
 import SegundUM.Productos.rest.dto.LugarRecogidaDTO;
 import SegundUM.Productos.rest.dto.ProductoDTO;
 import SegundUM.Productos.rest.dto.ProductoUpdateDTO;
@@ -77,10 +78,10 @@ public class ProductoRestController {
     /** POST /productos — Dar de alta un producto */
     @PostMapping
     @PreAuthorize("hasAuthority('USUARIO') and #dto.vendedorId == authentication.principal")
-    public ResponseEntity<String> altaProducto(@Valid @RequestBody ProductoDTO dto) 
+    public ResponseEntity<String> altaProducto(@Valid @RequestBody AltaProductoDTO dto) 
             		throws ServicioException {
         String id = servicioProductos.altaProducto(dto.titulo, dto.descripcion, dto.precio, dto.estado,
-        		dto.categoriaId, dto.envioDisponible, dto.vendedorId);
+        		dto.categoriaId, dto.envioDisponible, dto.vendedorId, dto.recogida.toEntity());
         
         URI nuevaURI = ServletUriComponentsBuilder.fromCurrentRequest()
         		.path("/{id}")

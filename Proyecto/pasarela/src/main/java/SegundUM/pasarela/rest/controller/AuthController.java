@@ -39,6 +39,7 @@ public class AuthController {
 
         UsuarioDTO usuario = puertoUsuarios.verificarCredenciales(
                 loginRequest.getEmail(), loginRequest.getClave());
+        logger.info("usuario es admin : " + usuario.isAdministrador());
 
         if (usuario != null) {
             List<String> roles = new ArrayList<>();

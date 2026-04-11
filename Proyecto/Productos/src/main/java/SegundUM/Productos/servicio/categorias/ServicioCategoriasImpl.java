@@ -15,6 +15,8 @@ import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasJPA;
 import SegundUM.Productos.repositorio.categorias.RepositorioCategoriasXML;
 import SegundUM.Productos.servicio.ServicioException;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -26,6 +28,7 @@ import java.util.stream.StreamSupport;
 @Transactional
 public class ServicioCategoriasImpl implements ServicioCategorias {
 	private static final Logger logger = LoggerFactory.getLogger(ServicioCategoriasImpl.class);
+    private static final String CARPETA_CATEGORIAS = "categoriasXML";
 
     private final RepositorioCategoriasJPA repositorioCategorias;
     private final RepositorioCategoriasXML repositorioCategoriasXML;
@@ -51,6 +54,41 @@ public class ServicioCategoriasImpl implements ServicioCategorias {
         	logger.error("Error al cargar la jerarquía desde el XML: " + ruta, "casusa : " + e.getCause(), e);
             throw new ServicioException("Error al cargar la jerarquía desde el XML: " + ruta, e);
         }
+    }
+
+    @Override
+    public int cargarTodas() throws ServicioException {
+        logger.info("Iniciando carga masiva de categorías desde directorio: " + CARPETA_CATEGORIAS);
+
+        File directorio = new File(CARPETA_CATEGORIAS);
+
+        if (!directorio.exists()) {
+            logger.error("ERROR: No existe la carpeta: " + directorio.getAbsolutePath());
+            throw new ServicioException("El directorio " + CARPETA_CATEGORIAS + " no existe");
+        }
+
+        File[] archivosXML = directorio.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".xml");
+            }
+        });
+
+        int cargados = 0;
+        int fallidos = 0;
+        if (archivosXML != null) {
+            for (File archivo : archivosXML) {
+                try {
+                    cargarJerarquia(archivo.getName());
+                    cargados++;
+                } catch (ServicioException e) {
+                    fallidos++;
+                    logger.warn("FALLO al cargar: " + archivo.getName());
+                }
+            }
+            logger.info("=== FIN CARGA: " + cargados + " cargados, " + fallidos + " fallidos ===");
+        }
+        return cargados;
     }
 
     @Override
