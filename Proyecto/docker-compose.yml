@@ -150,6 +150,12 @@ services:
       ZUUL_ROUTES_CATEGORIAS_URL: http://productos:8080/api/categorias
       ZUUL_ROUTES_USUARIOS_URL: http://usuarios:8081/api/usuarios
       ZUUL_ROUTES_COMPRAVENTAS_URL: http://compraventas:8082/api/compraventas
+
+      # Esto sobreescribe los "localhost" de tu application.properties
+      ZUUL_ROUTES_DOCS-PRODUCTOS_URL: http://productos:8080/api-docs
+      ZUUL_ROUTES_DOCS-USUARIOS_URL: http://usuarios:8081/api-docs
+      ZUUL_ROUTES_DOCS-COMPRAVENTAS_URL: http://compraventas:8082/api-docs
+      
       # Retrofit URL para Usuarios
       API_USUARIOS_URL: http://usuarios:8081/api/
     depends_on:
