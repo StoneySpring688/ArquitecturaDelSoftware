@@ -1,7 +1,5 @@
 package SegundUM.pasarela.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/login/**", "/oauth2/**").permitAll()
+                .antMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 // El resto de rutas requieren autenticación (Zuul redirigirá a los microservicios)
                 .anyRequest().authenticated()
             .and()
