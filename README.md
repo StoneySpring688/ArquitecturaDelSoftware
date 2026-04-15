@@ -12,7 +12,7 @@ El servicio se encuentra desplegado y operativo en una instancia de Oracle Cloud
 ## 🐋 Arrancar con Docker
 
 ```bash
-cd Proyecto && docker compose up --build
+cd Proyecto && docker compose -f docker-compose.desarrollo.yml up
 ```
 
 Esto levanta todos los servicios (MySQL, MongoDB, RabbitMQ, Usuarios, Productos, Compraventas y Pasarela) en el orden correcto.
