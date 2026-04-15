@@ -1,0 +1,4 @@
+FROM rabbitmq:3-management
+# Copiamos la configuración y definiciones
+COPY rabbitmq-definitions.json /etc/rabbitmq/definitions.json
+COPY rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
