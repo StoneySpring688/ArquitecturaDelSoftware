@@ -16,11 +16,11 @@ La API estará disponible en `http://localhost:8090`.
 
 El Swagger UI de la pasarela agrega la documentación de todos los microservicios:
 
-| Servicio | Swagger UI | API Docs |
-| --- | --- | --- |
-| Pasarela (agregado) | http://localhost:8090/swagger-ui.html | http://localhost:8090/api-docs |
-| Productos | http://localhost:8080/swagger-ui.html | http://localhost:8090/docs/productos |
-| Compraventas | http://localhost:8082/swagger-ui.html | http://localhost:8090/docs/compraventas |
+| Servicio | Swagger UI 
+| --- | --- | 
+| Pasarela (agregado) | http://localhost:8090/swagger-ui.html | 
+| Productos | http://localhost:8080/swagger-ui.html | 
+| Compraventas | http://localhost:8082/swagger-ui.html | 
 
 > **Nota:** El servicio Usuarios (JAX-RS/Grizzly) no expone documentación Swagger.
 
