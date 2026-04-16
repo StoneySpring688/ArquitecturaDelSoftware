@@ -19,6 +19,20 @@ Esto levanta todos los servicios (MySQL, MongoDB, RabbitMQ, Usuarios, Productos,
 
 La API estará disponible en `http://localhost:8090`.
 
+## 📖 Documentación Técnica
+
+El Swagger UI de la pasarela agrega la documentación de los microservicios mediante el uso de `springdoc-openapi`.
+
+| Servicio | Swagger UI Local | Swagger UI OCI |
+| --- | --- | --- |
+| **Pasarela (Agregado)** | `http://localhost:8090/swagger-ui.html` | [Enlace OCI](http://79.72.53.253:8090/swagger-ui.html) |
+| **Productos** | `http://localhost:8080/swagger-ui.html` | - |
+| **Compraventas** | `http://localhost:8082/swagger-ui.html` | - |
+
+>[!NOTE]
+> **Nota sobre Usuarios:** 
+> El microservicio de Usuarios utiliza JAX-RS/Grizzly (no Spring Boot). Aunque no genera un Swagger UI dinámico, todos sus endpoints públicos están integrados en la tabla de arriba y son accesibles vía `/usuarios/**` en la Pasarela.
+
 ## 🔐 Credenciales de Prueba (Admin)
 Para facilitar la evaluación de los endpoints protegidos, se ha habilitado el siguiente usuario administrador en el servicio desplegado:
 
@@ -132,19 +146,6 @@ A través de la Pasarela (puerto 8090), se exponen los siguientes endpoints prin
 ```
 
 ---
-## 📖 Documentación Técnica
-
-El Swagger UI de la pasarela agrega la documentación de los microservicios mediante el uso de `springdoc-openapi`.
-
-| Servicio | Swagger UI Local | Swagger UI OCI |
-| --- | --- | --- |
-| **Pasarela (Agregado)** | `http://localhost:8090/swagger-ui.html` | [Enlace OCI](http://79.72.53.253:8090/swagger-ui.html) |
-| **Productos** | `http://localhost:8080/swagger-ui.html` | - |
-| **Compraventas** | `http://localhost:8082/swagger-ui.html` | - |
-
->[!NOTE]
-> **Nota sobre Usuarios:** 
-> El microservicio de Usuarios utiliza JAX-RS/Grizzly (no Spring Boot). Aunque no genera un Swagger UI dinámico, todos sus endpoints públicos están integrados en la tabla de arriba y son accesibles vía `/usuarios/**` en la Pasarela.
 
 ## 👥 Equipo de Trabajo
 
